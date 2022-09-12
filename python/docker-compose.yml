@@ -1,0 +1,13 @@
+version: "3.8"
+services:
+  jenkins-master:
+    container_name: jenkins-master
+    build:
+      context: ./
+    restart: always
+    ports:
+      - "50000:50000"
+      - "8080:8080"
+    environment:
+      - "Jenkins_PW=${Jenkins_PW}"
+      - "JAVA_OPTS=${JAVA_OPTS}"
