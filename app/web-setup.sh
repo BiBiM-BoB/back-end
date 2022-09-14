@@ -3,6 +3,7 @@
 # AWS Ubuntu에서 실행된다고 가정(실행시 sudu 필수)
 apt-get update
 apt install -y mysql-server
+apt install -y libmysqlclient-dev
 
 # mysql 실행
 systemctl mysql start
