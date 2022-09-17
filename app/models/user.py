@@ -14,6 +14,10 @@ class User(db.Model):
     updateAt = db.Column(db.DateTime, default=datetime.utcnow())
     deleteAt = db.Column(db.DateTime)
 
+    # relationship
+    pipeline = relationship("Pipeline")
+    security_result = relationship("SecurityResult")
+
     def __init__(self, user_id, password, nick):
         self.user_id = user_id
         self.password = password
