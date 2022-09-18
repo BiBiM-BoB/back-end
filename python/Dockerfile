@@ -12,9 +12,7 @@ USER root
 RUN apt-get update && apt-get install -y \
     python3 \
 	python3-pip \
-	git \
+	git
 
 # python 모듈 설치
-RUN python3 -m pip install venv
-
 USER jenkins

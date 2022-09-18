@@ -1,20 +1,26 @@
 from flask import Blueprint, request, jsonify
 from ..models import db
 from ..models.user import User
-import hashlib
+from ..utils.db import db_apply
 
 bp = Blueprint('user', __name__, url_prefix='/api/v1/user')
 
-def password_hash(password):
-    salt = "bibimbob" # 추후 env 설정 필요
-    hashed = hashlib.sha512(str(password + salt).encode('utf-8')).hexdigest()
-    return hashed
-
 @bp.route('/createUser', methods=['POST'])
 def create_user():
-    params = request.get_json()
-    result = User(params['user_id'], password_hash(params['password']), params['nick'])
+    try:
+        params = request.get_json()
+        if(not params['user_id'] or not params['password'] or not params['nick']):
+            return "check your value"
 
-    db.session.add(result)
-    db.session.commit()
+        user_match = User.query.filter_by(user_id=params['user_id']).all()
+
+        if(not user_match):
+            result = User(params['user_id'], params['password'], params['nick'])
+            db_apply([result])
+        else:
+            return "있는 유저" # 추후, 반환값 통일 후 msg: 로 넘김
+
+    except Exception as e:
+        print(e)
+        return "user create faild"
     return "complict"
