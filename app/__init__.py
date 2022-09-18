@@ -12,4 +12,12 @@ def create_app():
     db.app = app
     db.create_all()
 
+    # routing
+    from .controllers import user
+    from .controllers import pipeline
+    from .controllers import security_result
+
+    app.register_blueprint(user.bp)
+    app.register_blueprint(pipeline.bp)
+    app.register_blueprint(security_result.bp)
     return app

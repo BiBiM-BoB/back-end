@@ -15,4 +15,7 @@ mysql -u root -e "CREATE DATABASE devsecopsdb"
 mysql -u root -e "CREATE USER 'bibimbob'@'%' identified BY '1q2w3e4r!'"
 mysql -u root -e "GRANT ALL PRIVILEGES ON devsecopsdb.* TO bibimbob@'%'"
 
+# python 모듈 설치
+python3 -m pip install -r requirements.txt
+
 echo "[DONE] web-setup"

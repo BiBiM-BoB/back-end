@@ -16,6 +16,7 @@ class Pipeline(db.Model):
     # relationship
     security_result = relationship('SecurityResult')
     
-    def __init__(self, repo_url, jenkinsfile_path):
+    def __init__(self, repo_url, jenkinsfile_path, owner_id):
         self.repo_url = repo_url
         self.jenkinsfile_path = jenkinsfile_path
+        self.owner_id = owner_id
