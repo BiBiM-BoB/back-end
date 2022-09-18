@@ -1,8 +1,9 @@
 from sqlalchemy.orm import relationship
+from sqlalchemy_serializer import SerializerMixin
 from datetime import datetime
 from ..models import db
 
-class Pipeline(db.Model):
+class Pipeline(db.Model, SerializerMixin):
     __tablename__ = "pipelines"
     
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, nullable=False)
