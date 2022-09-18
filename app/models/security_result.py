@@ -1,6 +1,6 @@
 from sqlalchemy.orm import relationship
 from datetime import datetime
-from ..models import db
+from ..models import db, ma
 
 class SecurityResult(db.Model):
     __tablename__ = "security_results"
@@ -17,3 +17,10 @@ class SecurityResult(db.Model):
         self.pipeline_id = pipeline_id
         self.user_id = user_id
         self.resultfile_path = resultfile_path
+
+class SecurityResultSchema(ma.Schema):
+    class Meta:
+        fields = ('id', 'pipeline_id', 'user_id', 'resultfile_path', 'createAt', 'updateAt', 'deleteAt')
+
+security_result_schema = SecurityResultSchema()
+security_results_schema = SecurityResultSchema(many=True)

@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from ..utils.db import *
 from ..models import db
-from ..models.pipeline import Pipeline
+from ..models.pipeline import *
 from ..models.user import User
 
 
@@ -30,9 +30,10 @@ def create_pipeline():
 @bp.route('/pipelineList', methods=['GET'])
 def pipeline_list():
     try:
-        result = Pipeline.query.filter(Pipeline.deleteAt==None)
-        return query2json(result)
-        
+        all_pipelines = Pipeline.query.filter(Pipeline.deleteAt==None)
+        result = pipelines_schema.dump(all_pipelines)
+
+        return jsonify(result)
     except Exception as e:
         print(e)
         return "get pipeline list faild"

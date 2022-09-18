@@ -1,6 +1,6 @@
 from sqlalchemy.orm import relationship
 from datetime import datetime
-from ..models import db
+from ..models import db, ma
 import hashlib
 
 class User(db.Model):
@@ -31,4 +31,9 @@ class User(db.Model):
         hashed = hashlib.sha512(str(password + salt).encode('utf-8')).hexdigest()
         return hashed
     
-    
+class UserSchema(ma.Schema):
+    class Meta:
+        fields = ('id', 'user_id', 'password', 'nick', 'permission', 'createAt', 'updateAt', 'deleteAt')
+
+user_schema = UserSchema()
+users_schema = UserSchema(many=True)

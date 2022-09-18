@@ -1,9 +1,8 @@
 from sqlalchemy.orm import relationship
-from sqlalchemy_serializer import SerializerMixin
 from datetime import datetime
-from ..models import db
+from ..models import db, ma
 
-class Pipeline(db.Model, SerializerMixin):
+class Pipeline(db.Model):
     __tablename__ = "pipelines"
     
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, nullable=False)
@@ -21,3 +20,10 @@ class Pipeline(db.Model, SerializerMixin):
         self.repo_url = repo_url
         self.jenkinsfile_path = jenkinsfile_path
         self.owner_id = owner_id
+
+class PipelineSchema(ma.Schema):
+    class Meta:
+        fields = ('id', 'repo_url', 'jenkinsfile_path', 'owner_id', 'createAt', 'updateAt', 'deleteAt')
+
+pipeline_schema = PipelineSchema()
+pipelines_schema = PipelineSchema(many=True)
