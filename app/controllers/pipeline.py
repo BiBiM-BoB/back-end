@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+from sqlalchemy import and_
 from ..utils.db import *
 from ..models import db
 from ..models.pipeline import *
@@ -15,7 +16,7 @@ def create_pipeline():
         if(not params['repo_url'] or not params['jenkinsfile_path'] or not params['owner_id']):
             return "check your values"
         
-        user_match = User.query.filter_by(user_id=params['owner_id']).first()
+        user_match = User.query.filter(and_(User.id == params['owner_id'], User.deleteAt == None)).first()
         if(user_match):
             result = Pipeline(params['repo_url'], params['jenkinsfile_path'], params['owner_id'])
             db_apply([result])
