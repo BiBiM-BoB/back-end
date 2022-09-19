@@ -38,4 +38,4 @@ def pipeline_list():
         return resp(200, "success", result)
     except Exception as e:
         print(e)
-        return resp(500, "get pipeline list faild")
+        return resp(500, "get pipeline list failed")
