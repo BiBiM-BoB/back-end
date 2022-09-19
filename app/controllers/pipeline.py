@@ -21,7 +21,7 @@ def create_pipeline():
         if(user_match):
             result = Pipeline(params['repo_url'], params['jenkinsfile_path'], params['owner_id'])
             db_apply([result])
-            return resp(200, "create pipeline success")
+            return resp(201, "create pipeline success")
         else:
             return resp(400, "create pipeline failed")
 

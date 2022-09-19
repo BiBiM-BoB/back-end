@@ -1,4 +1,3 @@
-from cgi import parse_multipart
 from flask import Blueprint, request, jsonify
 from ..models import db
 from ..models.user import User
@@ -19,9 +18,9 @@ def create_user():
         if(not user_match): # 유저가 없는 경우
             result = User(params['user_id'], params['password'], params['nick'])
             db_apply([result])
-            return resp(200, "create user success")
+            return resp(201, "create user success")
         else:
-            return resp(500, "user ID already exists")
+            return resp(409, "user ID already exists")
 
     except Exception as e:
         print(e)

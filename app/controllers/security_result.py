@@ -17,7 +17,7 @@ def create_security_result():
         result = SecurityResult(params['pipeline_id'], params['pipeline_name'], params['user_id'], params['resultfile_path'])
         db_apply([result])
         
-        return resp(200, "create security result success")
+        return resp(201, "create security result success")
     except Exception as e:
         print(e)
         return resp(500, "create security result faild")
