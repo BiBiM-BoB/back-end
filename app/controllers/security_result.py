@@ -20,3 +20,15 @@ def create_security_result():
     except Exception as e:
         print(e)
         return "create security result faild"
+
+@bp.route('/securityResultList', methods=["GET"])
+def security_result_list():
+    try:
+        all_security_result = SecurityResult.query.filter(SecurityResult.deleteAt==None)
+        result = security_results_schema.dump(all_security_result)
+        
+        return jsonify(result)
+        
+    except Exception as e:
+        print(e)
+        return "get security result list faild"
