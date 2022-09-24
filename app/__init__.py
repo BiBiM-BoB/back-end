@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_cors import CORS
 from .models import db, ma
 
 def create_app():
@@ -13,6 +14,9 @@ def create_app():
 
     db.app = app
     db.create_all()
+
+    # CORS
+    CORS(app)
 
     # routing
     from .controllers import user, pipeline, security_result
