@@ -1,0 +1,75 @@
+<html>
+    <head>
+        <script src="http://code.jquery.com/jquery-latest.js"></script>
+        <script src="./jquery.cookie.js"></script>
+    </head>
+    <body>
+        <div>
+            <input type="text" id="user_id" placeholder="user id">
+            <input type="password" id="password" placeholder="password">
+            <input type="button" id="login" value="login">
+        </div>
+        <div>
+            <input type="text" id="pipeline_name" placeholder="pipeline name">
+            <input type="text" id="repo_url" placeholder="repo url">
+            <input type="text" id="jenkinsfile_path" placeholder="jenkins file path">
+            <input type="text" id="owner_id" placeholder="owner id">
+            <input type="button" id="test1" value="API send">
+        </div>
+    </body>
+    
+    <script>
+        $("#test1").click(function() {
+            console.log("send pipe data")
+            let params = {
+                "pipeline_name": $("#pipeline_name").val(),
+                "repo_url": $("#repo_url").val(),
+                "jenkinsfile_path": $("#jenkinsfile_path").val(),
+                "owner_id": $("#owner_id").val()
+            };
+            
+            $.ajax({
+                type: "POST",
+                url: "http://13.125.105.162:5000/api/v1/pipeline/createPipeline",
+                data: JSON.stringify(params),
+                contentType: "application/json",
+                success: function(res){
+                    // let data = JSON.parse(res);
+                    console.log(res)
+                }
+            });
+        });
+
+        $("#login").click(function(){
+            console.log("send login data");
+            let params = {
+                "user_id": $("#user_id").val(),
+                "password": $("#password").val()
+            }
+            
+            $.ajax({
+                type: "POST",
+                url: "http://13.125.105.162:5000/api/v1/user/login",
+                data: JSON.stringify(params),
+                contentType: "application/json",
+                success: function(res){
+                    console.log(res)
+                    let access_token = res['result']['access_token']
+                    
+                    console.log((access_token))
+                    if (res['msg'] == 'login success') {
+                        console.log('start')
+                        document.cookie = `access_token=${access_token}; path=/;`;
+                        // $.cookie('access_token', access_token, { path:'/' });
+                        console.log('end')
+                        alert(document.cookie)
+                    } else {
+                        alert(res['msg'])
+                    }
+                }
+            })
+        });
+    </script>
+</html>
+
+<!-- params['pipeline_name'] or not params['repo_url'] or not params['jenkinsfile_path'] or not params['owner_id']):  -->

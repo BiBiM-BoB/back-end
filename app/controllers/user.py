@@ -1,4 +1,8 @@
 from flask import Blueprint, request, jsonify
+from sqlalchemy import and_, or_
+import jwt
+from datetime import datetime, timedelta
+
 from ..models import db
 from ..models.user import User
 from ..utils.db import db_apply
@@ -25,3 +29,30 @@ def create_user():
     except Exception as e:
         print(e)
         return resp(500, "user create failed")
+
+@bp.route('/login', methods=['POST'])
+def login():
+    try:
+        params = request.get_json()
+        
+        if(not params['user_id'] or not params['password']):
+            return resp(400, "check your values")
+
+        user_match = User.query.filter(and_(
+            User.user_id==params['user_id'], 
+            User.password==params['password']))
+        
+        if(user_match):
+            payload = {
+                "user_id": params['user_id'],
+                "exp": datetime.utcnow() + timedelta(seconds=60 * 60 * 24)
+            }
+            print(payload)
+            token = jwt.encode(payload, "secret-key", algorithm='HS256') # 추후, 환경변수로 변경
+            print("token+++++")
+            print(token)
+            return resp(200, "login success", { "access_token" : token })
+        else:
+            return resp(400, "login failed")
+    except:
+        return resp(500, "login failed")

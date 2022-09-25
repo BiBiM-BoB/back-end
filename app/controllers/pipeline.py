@@ -5,11 +5,13 @@ from ..models import db
 from ..models.pipeline import *
 from ..models.user import User
 from ..utils.response import resp
+from ..utils.login import login_required
 
 
 bp = Blueprint('pipeline', __name__, url_prefix='/api/v1/pipeline')
 
 @bp.route('/createPipeline', methods=['POST'])
+@login_required
 def create_pipeline():
     try:
         params = request.get_json()
@@ -30,6 +32,7 @@ def create_pipeline():
         return resp(500, "create pipeline failed")
 
 @bp.route('/pipelineList', methods=['GET'])
+@login_required
 def pipeline_list():
     try:
         all_pipelines = Pipeline.query.filter(Pipeline.deleteAt==None)

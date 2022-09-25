@@ -1,5 +1,7 @@
 from flask import Blueprint, request, jsonify
 
+from ..utils.login import login_required
+
 from ..utils.db import db_apply
 from ..models import db
 from ..models.security_result import *
@@ -8,6 +10,7 @@ from ..utils.response import resp
 bp = Blueprint('security_result', __name__, url_prefix='/api/v1/security_result')
 
 @bp.route('/createSecurityResult', methods=['POST'])
+@login_required
 def create_security_result():
     try:
         params = request.get_json()
@@ -20,9 +23,10 @@ def create_security_result():
         return resp(201, "create security result success")
     except Exception as e:
         print(e)
-        return resp(500, "create security result faild")
+        return resp(500, "create security result failed")
 
 @bp.route('/securityResultList', methods=["GET"])
+@login_required
 def security_result_list():
     try:
         all_security_result = SecurityResult.query.filter(SecurityResult.deleteAt==None)
@@ -32,4 +36,4 @@ def security_result_list():
         
     except Exception as e:
         print(e)
-        return resp(500, "get security result list faild")
+        return resp(500, "get security result list failed")
