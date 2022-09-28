@@ -1,4 +1,3 @@
-from asyncio.windows_events import NULL
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from ..models import db, ma
@@ -15,8 +14,10 @@ class Pipeline(db.Model):
     createAt = db.Column(db.DateTime, default=datetime.utcnow())
     updateAt = db.Column(db.DateTime, default=datetime.utcnow())
     deleteAt = db.Column(db.DateTime)
-
-    # relationship
+    # 상태 저장 컬럼
+    # 
+      
+    # relationship 
     security_result = relationship('SecurityResult')
     
     def __init__(self, pipeline_name, repo_url, jenkinsfile_path_deploy, jenkinsfile_path_security, owner_id):
