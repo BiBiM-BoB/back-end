@@ -71,3 +71,22 @@ def update_pipeline(id):
     except Exception as e:
         print(e)
         return resp(500, "update pipeline failed")
+
+@bp.route('/deletePipeline/<id>', methods=['POST'])
+def delete_pipeline(id):
+    try:
+        # 권한체크
+        
+        # 삭제(deleteAt 추가)
+        pipeline = Pipeline.query.get(id)
+        
+        if(pipeline is not None):
+            pipeline.deleteAt = datetime.utcnow()
+            db_apply([pipeline])
+
+            return resp(200, "delete success")
+        else:
+            return resp(400, "delete failed")
+    except Exception as e:
+        print(e)
+        return resp(500, "delete pipeline failed")
