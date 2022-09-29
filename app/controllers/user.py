@@ -40,17 +40,17 @@ def login():
 
         user_match = User.query.filter(and_(
             User.user_id==params['user_id'], 
-            User.password==params['password']))
+            User.password==params['password'])).first()
+        
+        print(user_match)
         
         if(user_match):
             payload = {
                 "user_id": params['user_id'],
                 "exp": datetime.utcnow() + timedelta(seconds=60 * 60 * 24)
             }
-            print(payload)
             token = jwt.encode(payload, "secret-key", algorithm='HS256') # 추후, 환경변수로 변경
-            print("token+++++")
-            print(token)
+
             return resp(200, "login success", { "access_token" : token })
         else:
             return resp(400, "login failed")
