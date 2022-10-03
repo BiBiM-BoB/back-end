@@ -19,11 +19,12 @@ def create_app():
     CORS(app)
 
     # routing
-    from .controllers import user, pipeline, security_result, test_render
+    from .controllers import user, pipeline, security_result, test_render, jenkins
     
     app.register_blueprint(test_render.bp)
 
     app.register_blueprint(user.bp)
     app.register_blueprint(pipeline.bp)
     app.register_blueprint(security_result.bp)
+    app.register_blueprint(jenkins.bp)
     return app
