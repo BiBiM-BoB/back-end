@@ -1,0 +1,14 @@
+<root>
+    <BASE>2</BASE>
+    <BUILD num="1">
+        <NodeJS>3</NodeJS>
+    </BUILD>
+    <DAST num="1">
+        <ZAP>4</ZAP>
+    </DAST>
+    <SAST num="1">
+        <CodeQL>0</CodeQL>
+    </SAST>
+    <SCA num="0"></SCA>
+    <SIS num="0"></SIS>
+</root>
