@@ -15,8 +15,8 @@ def call_generator(tool_list, jenkinsfile_name):
     """
     list_buffer = DAST.ZAP_generator()
     for component in list_buffer:
-            component_file = open(library_path+component[0]+'/'+str(component[1]), 'r')
-            jenkinsfile.write(component_file.read())
+        component_file = open(library_path+component[0]+'/'+str(component[1]), 'r')
+        jenkinsfile.write(component_file.read())
 
 def get_input(input_json):
     tool_list = []
@@ -31,4 +31,3 @@ def get_input(input_json):
 
 if __name__ == "__main__":
     call_generator(['ZAP'], 'test')
-    
