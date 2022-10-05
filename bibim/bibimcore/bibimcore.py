@@ -31,3 +31,4 @@ def get_input(input_json):
 
 if __name__ == "__main__":
     call_generator(['ZAP'], 'test')
+    
