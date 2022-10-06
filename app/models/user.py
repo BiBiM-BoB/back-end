@@ -18,6 +18,7 @@ class User(db.Model):
     # relationship
     pipeline = relationship("Pipeline")
     security_result = relationship("SecurityResult")
+    jenkins = relationship("Jenkins")
 
     def __init__(self, user_id, password, nick):
         self.user_id = user_id

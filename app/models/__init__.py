@@ -7,3 +7,6 @@ ma = Marshmallow()
 from .user import *
 from .pipeline import *
 from .security_result import *
+from .jenkins import *
+from .tool import *
+from .jenkins_has_tool import *
