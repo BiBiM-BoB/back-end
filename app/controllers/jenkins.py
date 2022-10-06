@@ -81,10 +81,8 @@ def signupPipeline(id):
     try:
         crumb = requests.get('http://test:11edef81d279d390e2d875dc8ad32292e8@112.167.178.26:8080/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,":",//crumb)')
         url = "http://test:11edef81d279d390e2d875dc8ad32292e8@112.167.178.26:8080/job/building-a-multibranch-pipeline-project/job/master/build"
-        print(1)
         test1, test2 = crumb.text.split(':')
         requests.post(url, headers={test1:test2})
-        print(2)
         
         return resp(200, "success")
 
@@ -96,9 +94,7 @@ def signupPipeline(id):
 # @login_required
 def start_pipeline():
     try:
-        print(1)
         call_generator(['ZAP'], 'test')
-        print(2)
         return resp(200, "success")
     except Exception as e:
         print(e)
