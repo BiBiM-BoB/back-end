@@ -8,7 +8,7 @@ class Pipeline(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, nullable=False)
     pipeline_name = db.Column(db.String(100, 'utf8mb4_unicode_ci'), nullable=False)
     repo_url = db.Column(db.String(1024, 'utf8mb4_unicode_ci'), nullable=False)
-    jenkins_id = db.Column(db.Integer, db.ForeignKey('pipelines.id'), nullable=False)
+    jenkins_id = db.Column(db.Integer, db.ForeignKey('jenkinses.id'), nullable=False)
     owner_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     createAt = db.Column(db.DateTime, default=datetime.utcnow())
     updateAt = db.Column(db.DateTime, default=datetime.utcnow())

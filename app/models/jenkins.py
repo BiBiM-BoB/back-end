@@ -17,10 +17,11 @@ class Jenkins(db.Model):
     pipeline = relationship("Pipeline")
     jenkins_has_tool = relationship("JenkinsHasTool")
 
-    def __init__(self, name, jenkinsfile_path, type):
+    def __init__(self, name, jenkinsfile_path, type, owner_id):
         self.name = name
         self.jenkinsfile_path = jenkinsfile_path
         self.type = type
+        self.owner_id = owner_id
 
 class JenkinsSchema(ma.Schema):
     class Meta:

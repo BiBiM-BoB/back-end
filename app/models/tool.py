@@ -21,7 +21,7 @@ class Tool(db.Model):
 
 class ToolSchema(ma.Schema):
     class Meta:
-        field = ('id', 'name', 'stage', 'createAt', 'updateAt', 'deleteAt')
+        fields = ('id', 'name', 'stage', 'createAt', 'updateAt', 'deleteAt')
 
 tool_schema = ToolSchema()
 tools_schema = ToolSchema(many=True)
