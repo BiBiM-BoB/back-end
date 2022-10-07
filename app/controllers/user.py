@@ -46,7 +46,7 @@ def login():
         
         if(user_match):
             payload = {
-                "user_id": params['user_id'],
+                "user_id": params['id'],
                 "exp": datetime.utcnow() + timedelta(seconds=60 * 60 * 24)
             }
             token = jwt.encode(payload, "secret-key", algorithm='HS256') # 추후, 환경변수로 변경

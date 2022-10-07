@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_cors import CORS
+
 from .models import db, ma
 
 def create_app():
@@ -19,7 +20,7 @@ def create_app():
     CORS(app)
 
     # routing
-    from .controllers import user, pipeline, security_result, test_render, jenkins
+    from .controllers import user, pipeline, security_result, test_render, jenkins, tool
     
     app.register_blueprint(test_render.bp)
 
@@ -27,4 +28,5 @@ def create_app():
     app.register_blueprint(pipeline.bp)
     app.register_blueprint(security_result.bp)
     app.register_blueprint(jenkins.bp)
+    app.register_blueprint(tool.bp)
     return app

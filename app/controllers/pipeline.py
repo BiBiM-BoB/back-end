@@ -17,12 +17,12 @@ def create_pipeline():
     try:
         params = request.get_json()
         
-        if(not params['pipeline_name'] or not params['repo_url'] or not params['jenkinsfile_path_deploy'] or not params['jenkinsfile_path_security'] or not params['owner_id']):
+        if(not params['pipeline_name'] or not params['repo_url'] or not params['jenkins_id'] or not params['owner_id']):
             return resp(400, "check your values")
 
         user_match = User.query.filter(and_(User.id == params['owner_id'], User.deleteAt == None)).first()
         if(user_match):
-            result = Pipeline(params['pipeline_name'], params['repo_url'], params['jenkinsfile_path_deploy'], params['jenkinsfile_path_security'], params['owner_id'])
+            result = Pipeline(params['pipeline_name'], params['repo_url'], params['jenkins_id'], params['owner_id'])
             db_apply([result])
             return resp(201, "create pipeline success")
         else:
