@@ -22,30 +22,33 @@ stage('Execute ZAP') {
 
 """
 
-tool_order_exception_dict = {
-    'ZAP': [('BASE', 1)]
-}
-
 import os
 import xml.etree.ElementTree as ET
+
+tool_order_exception_dict = {
+    'ZAP': [('BUILD/NodeJS', 1), ('BUILD/NodeJS', 2), 'DAST/ZAP', ('BUILD/NodeJS', -1)]
+}
+
+component_dir = './resources/tools_components/'
+
 
 def get_element_by_parent_list(root, parent_list):
     for parent in parent_list:
         root = root.find(parent)
     return root
 
-def init_tools_xml(): 
-    root = ET.Element("root")
-    rootdir = './resources/tools_components/'
 
-    for dirname, dirnames, filenames in os.walk(rootdir):
+def init_tools_xml():
+    root = ET.Element("root")
+
+    for dirname, dirnames, filenames in os.walk(component_dir):
         # print path to all filenames.
         if "\\" in dirname:
-            parents = dirname[len(rootdir):].split("\\")
+            parents = dirname[len(component_dir):].split("\\")
         else:
-            parents = dirname[len(rootdir):].split('/')
-        
-        if len(parents)==1 and parents[0]=='':
+            parents = dirname[len(component_dir):].split('/')
+
+        if len(parents) == 1 and parents[0] == '':
             for subdirname in dirnames:
                 ET.SubElement(root, subdirname)
         elif dirnames:
@@ -58,39 +61,61 @@ def init_tools_xml():
         else:
             print("3: " + str(parents))
             get_element_by_parent_list(root, parents).text = str(len(filenames))
-    
-    with open(rootdir+'tools_test.xml', "wb") as file:
+
+    with open(component_dir + 'tools.xml', "wb") as file:
         xml = ET.ElementTree(root)
         xml.write(file, method='html', encoding='utf-8')
 
 
-def call_generator(tool_list, jenkinsfile_path):
+def order_to_file(order):
+    if type(order) == str:
+        text = ""
+        tool = order.split('/')[-1]
+        for dirname, _, files in os.walk(component_dir + order + '/'):
+            files.sort()
+            for i in range(len(files)):
+                if int(files[i].split('.')[0]) > 0:
+                    files[i:], files[:i] = files[:i], files[i:]
+                    break
+            for file in files:
+                file = open(os.path.join(dirname, file), 'r')
+                text += file.read()
+                file.close()
+    else:
+        file = open(os.path.join(component_dir + order[0], str(order[1])))
+        text = file.read()
+        file.close()
+    print(text)
+    return text
+
+
+def jenkinsfile_generator(tool_list, jenkinsfile_path):
     jenkinsfile = open(jenkinsfile_path, 'w')
-    """
-    for tool in tool_list:
-        print(globals())
-        list_buffer = globals()[tool+'_generator']()
-        for component in list_buffer:
-            component_file = open(library_path+component[0]+'/'+component[1], 'r')
-            jenkinsfile.write(component_file.read())
-    """
-    list_buffer = DAST.ZAP_generator()
-    for component in list_buffer:
-        component_file = open(library_path + component[0] + '/' + str(component[1]), 'r')
-        jenkinsfile.write(component_file.read())
+    jenkinsfile.write(order_to_file(('FUNC', 1)))
 
+    for tool_path in tool_list:
+        tool = tool_path.split('/')[-1]
+        if tool not in tool_order_exception_dict.keys():
+            jenkinsfile.write(order_to_file(tool_path))
+        else:
+            order_list = tool_order_exception_dict[tool]
+            for order in order_list:
+                jenkinsfile.write(order_to_file(order))
 
-def web_input(input_json):
+    jenkinsfile.write(order_to_file(('FUNC', -1)))
+    jenkinsfile.close()
+
+def json_to_list(input_json, workspace_path):
     tool_list = []
 
     for stage in input_json:
         for tool in stage:
             if input_json[stage][tool]:
-                tool_list.append(stage + '.' + tool)
+                tool_list.append(stage + '/' + tool)
 
-    call_generator(tool_list)
+    jenkinsfile_generator(tool_list, workspace_path + '/Jenkinsfile')  # TODO
 
 
 if __name__ == "__main__":
     # call_generator(['ZAP'], 'test')
-    init_tools_xml()
+    jenkinsfile_generator(['DAST/ZAP'], './jenkinsfiletest')
