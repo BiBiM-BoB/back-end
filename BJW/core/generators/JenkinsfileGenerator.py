@@ -26,8 +26,43 @@ tool_order_exception_dict = {
     'ZAP': [('BASE', 1)]
 }
 
-def init_tools_xml():
-    pass
+import os
+import xml.etree.ElementTree as ET
+
+def get_element_by_parent_list(root, parent_list):
+    for parent in parent_list:
+        root = root.find(parent)
+    return root
+
+def init_tools_xml(): 
+    root = ET.Element("root")
+    rootdir = './resources/tools_components/'
+
+    for dirname, dirnames, filenames in os.walk(rootdir):
+        # print path to all filenames.
+        if "\\" in dirname:
+            parents = dirname[len(rootdir):].split("\\")
+        else:
+            parents = dirname[len(rootdir):].split('/')
+        
+        if len(parents)==1 and parents[0]=='':
+            for subdirname in dirnames:
+                ET.SubElement(root, subdirname)
+        elif dirnames:
+            print("2: " + str(parents))
+            temp = get_element_by_parent_list(root, parents)
+            temp.attrib["num"] = str(len(dirnames))
+            for subdirname in dirnames:
+                ET.SubElement(temp, subdirname)
+                # ET.SubElement(parents[-1], subdirname)
+        else:
+            print("3: " + str(parents))
+            get_element_by_parent_list(root, parents).text = str(len(filenames))
+    
+    with open(rootdir+'tools_test.xml', "wb") as file:
+        xml = ET.ElementTree(root)
+        xml.write(file, method='html', encoding='utf-8')
+
 
 def call_generator(tool_list, jenkinsfile_path):
     jenkinsfile = open(jenkinsfile_path, 'w')
@@ -57,4 +92,5 @@ def web_input(input_json):
 
 
 if __name__ == "__main__":
-    call_generator(['ZAP'], 'test')
+    # call_generator(['ZAP'], 'test')
+    init_tools_xml()
