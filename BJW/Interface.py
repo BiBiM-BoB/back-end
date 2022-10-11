@@ -2,7 +2,9 @@
 Back-end nodejs/nestjs와의 통신을 위한 interface 입니다.
 """
 import sys
-import core
+
+import core.pipeline
+from core import jenkins, pipeline
 from jenkinsapi.jenkins import Jenkins
 
 
@@ -40,7 +42,7 @@ class PipelineInterface:
 
     def runPipeline(self, *args):
         try:
-            result = core.run_pipeline(self.jenkins, *args)
+            result = core.pipeline.run_pipeline(self.jenkins, *args)
             sendStream("stdout", result)
         except:
             sendStream("stdout", "ERROR")
@@ -48,21 +50,21 @@ class PipelineInterface:
 
     def createPipeline(self, *args):
         try:
-            result = core.create_pipeline(self.jenkins, *args)
+            result = core.pipeline.create_pipeline(self.jenkins, *args)
             sendStream("stdout", result)
         except:
             sendStream("stdout", "ERROR")
 
     def deletePipeline(self, *args):
         try:
-            result = core.delete_pipeline(self.jenkins, *args)
+            result = core.pipeline.delete_pipeline(self.jenkins, *args)
             sendStream("stdout", result)
         except:
             sendStream("stdout", "ERROR")
 
     def modifyPipeline(self, *args):
         try:
-            result = core.modify_pipeline(self.jenkins, *args)
+            result = core.pipeline.modify_pipeline(self.jenkins, *args)
             sendStream("stdout", result)
         except:
             sendStream("stdout", "ERROR")
@@ -70,6 +72,7 @@ class PipelineInterface:
 
 
 if __name__ == "__main__":
+    print("DEBUGGING..")
     if len(sys.argv) < 2:
         sendStream("stderr", "ERROR: No arguments!")
     else:

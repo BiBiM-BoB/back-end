@@ -3,7 +3,7 @@ import shutil
 import inspect
 
 class XMLGenerator:
-    def __init__(self, workspace_dir, repository_dir, xml_name, branch, token):
+    def __init__(self, *args):
         self.target_xml_path = workspace_dir + xml_name
         self.repository_dir = repository_dir
         self.branch = branch
@@ -29,6 +29,8 @@ class XMLGenerator:
 
     # replacing '$bibim' to input values
     # TODO: 커스터마이징이 조금 더 쉽도록 *args, **kargs 형태로 수정
+
+    def replace_contents(self, *args):
     def auto_set(self):
         for attributes in inspect.getmembers(self):
             if attributes[0][:4] == 'set_':
