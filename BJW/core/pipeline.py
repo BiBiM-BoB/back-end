@@ -1,17 +1,19 @@
 from jenkinsapi.jenkins import Jenkins
 from jenkinsapi.build import Build
-from .generators import JenkinsfileGenerator
+from .generators.JenkinsfileGenerator import JenkinsfileGenerator
 from .generators.XMLGenerator import XMLGenerator
 
 
-def create_pipeline(jenkins: Jenkins, pipeline_name, git_path, tool_list, branch, build_token):
-    jenkinsfile = JenkinsfileGenerator.json_to_list(git_path, tool_list)
-    xml = XMLGenerator(("url", git_path),
-                       ("projectUrl", git_path),
+def create_pipeline(jenkins: Jenkins, pipeline_name, git_path, tool_json, branch, build_token):
+    localgitdir, jenkinsfile = JenkinsfileGenerator(pipeline_name, tool_json).post_action()
+    xml = XMLGenerator(pipeline_name,
+                       ("remote", git_path),
+                       ("url", localgitdir),
                        # TODO: jenkinsfile local git management
-                       # ("jenkinsfile_path", jenkinsfile),
+                       ("remoteJenkinsFile", jenkinsfile),
                        ("name", branch),
-                       ("authToken", build_token))
+                       # ("authToken", build_token)
+                       ).post_action()
     job_instance = jenkins.create_job(pipeline_name, xml.target_xml_path)
 
     return "createPipeline Succeed!"

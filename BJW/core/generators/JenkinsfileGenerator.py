@@ -24,6 +24,7 @@ stage('Execute ZAP') {
 
 import os
 import xml.etree.ElementTree as ET
+from GeneratorBase import GeneratorBase
 
 tool_order_exception_dict = {
     'ZAP': [('BUILD/NodeJS', 1), ('BUILD/NodeJS', 2), 'DAST/ZAP', ('BUILD/NodeJS', -1)]
@@ -31,6 +32,16 @@ tool_order_exception_dict = {
 
 component_dir = './resources/tools_components/'
 
+
+def json_to_list(input_json):
+    tool_list = []
+
+    for stage in input_json:
+        for tool in stage:
+            if input_json[stage][tool]:
+                tool_list.append(stage + '/' + tool)
+
+    return tool_list
 
 def get_element_by_parent_list(root, parent_list):
     for parent in parent_list:
@@ -89,33 +100,32 @@ def order_to_file(order):
     return text
 
 
-def jenkinsfile_generator(tool_list, jenkinsfile_path):
-    jenkinsfile = open(jenkinsfile_path, 'w')
-    jenkinsfile.write(order_to_file(('FUNC', 1)))
+class JenkinsfileGenerator(GeneratorBase):
+    def __init__(self, pipeline_name, input_json):
+        # init tools.xml
+        init_tools_xml()
+        self.pipeline_name = pipeline_name
+        self.jenkinsfile_path = self.localgitdir + "Jenkinsfiles/" + pipeline_name
+        self.tool_list = json_to_list(input_json)
 
-    for tool_path in tool_list:
-        tool = tool_path.split('/')[-1]
-        if tool not in tool_order_exception_dict.keys():
-            jenkinsfile.write(order_to_file(tool_path))
-        else:
-            order_list = tool_order_exception_dict[tool]
-            for order in order_list:
-                jenkinsfile.write(order_to_file(order))
-
-    jenkinsfile.write(order_to_file(('FUNC', -1)))
-    jenkinsfile.close()
-
-def json_to_list(input_json, workspace_path):
-    tool_list = []
-
-    for stage in input_json:
-        for tool in stage:
-            if input_json[stage][tool]:
-                tool_list.append(stage + '/' + tool)
-
-    jenkinsfile_generator(tool_list, workspace_path + '/Jenkinsfile')  # TODO
+        self.commit("Generated Jenkinsfile {pipeline_name}")
 
 
-if __name__ == "__main__":
-    # call_generator(['ZAP'], 'test')
-    jenkinsfile_generator(['DAST/ZAP'], './jenkinsfiletest')
+    def generate_jenkinsfile(self, tool_list):
+        jenkinsfile = open(self.jenkinsfile_path, 'w')
+        jenkinsfile.write(order_to_file(('FUNC', 1)))
+
+        for tool_path in tool_list:
+            tool = tool_path.split('/')[-1]
+            if tool not in tool_order_exception_dict.keys():
+                jenkinsfile.write(order_to_file(tool_path))
+            else:
+                order_list = tool_order_exception_dict[tool]
+                for order in order_list:
+                    jenkinsfile.write(order_to_file(order))
+
+        jenkinsfile.write(order_to_file(('FUNC', -1)))
+        jenkinsfile.close()
+
+    def post_action(self):
+        return self.localgitdir, "Jenkinsfiles/" + self.pipeline_name
