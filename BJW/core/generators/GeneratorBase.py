@@ -1,5 +1,17 @@
-from ..utils.localgit import commit_all
 import os
+from git import Repo
+
+
+def commit_all(gitdir, commit_message):
+    repo = Repo(gitdir)
+    try:
+        repo.index.add('**')
+        repo.index.commit(commit_message)
+        print("[+] Commited all changed files.")
+    except:
+        print("[-] Git commit failed...")
+        return False
+    return True
 
 
 class GeneratorBase:

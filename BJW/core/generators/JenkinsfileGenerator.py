@@ -24,20 +24,23 @@ stage('Execute ZAP') {
 
 import os
 import xml.etree.ElementTree as ET
-from GeneratorBase import GeneratorBase
+from .GeneratorBase import GeneratorBase
+import json
 
 tool_order_exception_dict = {
     'ZAP': [('BUILD/NodeJS', 1), ('BUILD/NodeJS', 2), 'DAST/ZAP', ('BUILD/NodeJS', -1)]
 }
 
-component_dir = './resources/tools_components/'
+component_dir = os.path.abspath('.') + "/core/generators/resources/tools_components/"
 
 
 def json_to_list(input_json):
     tool_list = []
 
-    for stage in input_json:
-        for tool in stage:
+    input_json = json.loads(input_json)
+
+    for stage in input_json.keys():
+        for tool in input_json[stage].keys():
             if input_json[stage][tool]:
                 tool_list.append(stage + '/' + tool)
 
@@ -108,6 +111,7 @@ class JenkinsfileGenerator(GeneratorBase):
         self.jenkinsfile_path = self.localgitdir + "Jenkinsfiles/" + pipeline_name
         self.tool_list = json_to_list(input_json)
 
+        self.generate_jenkinsfile(self.tool_list)
         self.commit("Generated Jenkinsfile {pipeline_name}")
 
 
@@ -129,3 +133,23 @@ class JenkinsfileGenerator(GeneratorBase):
 
     def post_action(self):
         return self.localgitdir, "Jenkinsfiles/" + self.pipeline_name
+
+if __name__ == "__main__":
+    json_obj = {
+        'DAST': {
+            'ZAP': 1
+        },
+        'SAST': {
+            'CodeQL': 1
+        },
+        'SCA': {
+            'DependencyCheck': 0
+        },
+        'SIS': {
+            'GGShield': 0,
+            'GitLeaks': 0
+        }
+    }
+    json_obj = json.dumps(json_obj)
+    test = JenkinsfileGenerator('test_pipeline_name', json_obj)
+    print("DEBUGGING")

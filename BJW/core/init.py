@@ -1,5 +1,6 @@
-from utils.localgit import create_git, commit_all
+from .utils.localgit import create_git, commit_all
 import os
+import shutil
 
 
 def create_bibim_folder():
@@ -24,12 +25,21 @@ def create_resources_git():
         print(f"[+] Created local git on {path}!")
 
         os.mkdir(path + 'xmls/')
+
         os.mkdir(path + 'Jenkinsfiles/')
 
         commit_all(path, "initial commit")
 
     except:
         print("[-] Local git already exists ...")
+
+    try:
+        shutil.copyfile(os.path.abspath('.') + "/core/generators/resources/config.xml", path + "xmls/config.xml")
+        commit_all(path, "put config.xml")
+        print("[+] Created base config.xml file on git!")
+
+    except:
+        print("[-] Base config.xml already exists ...")
         return False
     return True
 

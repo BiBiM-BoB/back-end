@@ -4,8 +4,10 @@ Back-end nodejs/nestjs와의 통신을 위한 interface 입니다.
 import sys
 
 import core.pipeline
-from core import jenkins, pipeline
 from jenkinsapi.jenkins import Jenkins
+from jenkinsapi.utils.crumb_requester import CrumbRequester
+
+from core.init import auto_init
 
 
 def sendStream(stream, string):
@@ -17,8 +19,9 @@ def sendStream(stream, string):
 
 
 def getJenkinsInstance(url, username, password):
-    # TODO
-    server = Jenkins(url, username=username, password=password)
+    crumb = CrumbRequester(username=username, password=password, baseurl=url)
+    server = Jenkins(url, username=username, password=password, requester=crumb)
+    print("[+] Successfully connencted to Jenkins Server!")
     return server
 
 class JenkinsInterface:
@@ -38,6 +41,7 @@ class JenkinsInterface:
 # TODO sendStream -> stderr
 class PipelineInterface:
     def __init__(self, url, username, password):
+        auto_init()
         self.jenkins = getJenkinsInstance(url, username, password)
 
     def runPipeline(self, *args):
@@ -49,11 +53,9 @@ class PipelineInterface:
 
 
     def createPipeline(self, *args):
-        try:
-            result = core.pipeline.create_pipeline(self.jenkins, *args)
-            sendStream("stdout", result)
-        except:
-            sendStream("stdout", "ERROR")
+        # *args : pipeline_name, git_path, tool_json, branch, build_token
+        result = core.pipeline.create_pipeline(self.jenkins, *args)
+        sendStream("stdout", result)
 
     def deletePipeline(self, *args):
         try:
@@ -72,7 +74,31 @@ class PipelineInterface:
 
 
 if __name__ == "__main__":
+    import json
+    json_obj = {
+        'DAST': {
+            'ZAP': 1
+        },
+        'SAST': {
+            'CodeQL': 1
+        },
+        'SCA': {
+            'DependencyCheck': 0
+        },
+        'SIS': {
+            'GGShield': 0,
+            'GitLeaks': 0
+        }
+    }
+    json_obj = json.dumps(json_obj)
+    test = PipelineInterface("http://localhost:8080", 'test', 'test')
+    test.createPipeline('testnme', "https://github.com/digininja/DVWA", json_obj, "*/master", 'tokensample')
     print("DEBUGGING..")
+
+
+
+
+    """
     if len(sys.argv) < 2:
         sendStream("stderr", "ERROR: No arguments!")
     else:
@@ -80,3 +106,4 @@ if __name__ == "__main__":
 
     PipelineInterface.func = getattr(PipelineInterface, sys.argv[1])
     PipelineInterface.func(*sys.argv[2:])
+    """

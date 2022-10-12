@@ -18,3 +18,11 @@ PipelineInterface.modifyPipeline(미완)
 PipelineInterface.runPipeline(pipeline_name)
 ```
 
+job = {
+    'DAST': {
+        'ZAP': 1
+    },
+    'SAST' : {
+        'CodeQL': 1
+    }
+}

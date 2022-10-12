@@ -1,5 +1,4 @@
 from jenkinsapi.jenkins import Jenkins
-from jenkinsapi.build import Build
 from .generators.JenkinsfileGenerator import JenkinsfileGenerator
 from .generators.XMLGenerator import XMLGenerator
 
@@ -9,12 +8,11 @@ def create_pipeline(jenkins: Jenkins, pipeline_name, git_path, tool_json, branch
     xml = XMLGenerator(pipeline_name,
                        ("remote", git_path),
                        ("url", localgitdir),
-                       # TODO: jenkinsfile local git management
                        ("remoteJenkinsFile", jenkinsfile),
                        ("name", branch),
                        # ("authToken", build_token)
                        ).post_action()
-    job_instance = jenkins.create_job(pipeline_name, xml.target_xml_path)
+    job_instance = jenkins.create_job(pipeline_name, xml)
 
     return "createPipeline Succeed!"
 
@@ -39,3 +37,25 @@ def run_pipeline(jenkins: Jenkins, pipeline_name, *args):
 
 def create_multibranch_pipeline():
     pass
+
+if __name__ == "__main__":
+    import json
+
+    json_obj = {
+        'DAST': {
+            'ZAP': 1
+        },
+        'SAST': {
+            'CodeQL': 1
+        },
+        'SCA': {
+            'DependencyCheck': 0
+        },
+        'SIS': {
+            'GGShield': 0,
+            'GitLeaks': 0
+        }
+    }
+    json_obj = json.dumps(json_obj)
+    jenkins = Jenkins("http://localhost:8080", 'test', 'test')
+    create_pipeline(jenkins, 'test_pipe_name', "https://github.com/digininja/DVWA", json_obj, "*/master", 'tokensample')
