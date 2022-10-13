@@ -3,10 +3,12 @@ Back-end nodejs/nestjs와의 통신을 위한 interface 입니다.
 """
 import sys
 
-import core.pipeline
+from .core import pipeline
 from api4jenkins import Jenkins
+from jenkinsapi.utils.crumb_requester import CrumbRequester
+import jenkinsapi.jenkins
 
-from core.init import auto_init
+from .core.init import auto_init
 
 
 def sendStream(stream, string):
@@ -40,35 +42,36 @@ class JenkinsInterface:
 class PipelineInterface:
     def __init__(self, url, username, password):
         auto_init()
+        self.url = url
+        self.username = username
+        self.password = password
         self.jenkins = getJenkinsInstance(url, username, password)
 
-    def runPipeline(self, pipeline_name: str, getlogger: bool):
-        logger = core.pipeline.run_pipeline(self.jenkins, pipeline_name)
-        if getlogger:
-            return logger
-        else:
-            for line in logger.progressive_output():
-                print(line)
+    def runPipeline(self, pipeline_name: str):
+        crumb = CrumbRequester(username=self.username, password=self.password, baseurl=self.url)
+        jenkins = jenkinsapi.jenkins.Jenkins(self.url, username=self.username, password=self.password, requester=crumb)
+        jenkins.build_job(pipeline_name)
+        print(f"[+] Successfully ran pipeline {pipeline_name}!")
 
 
     def createPipeline(self, *args):
         try:
             # *args : pipeline_name, git_path, tool_json, branch, build_token
-            result = core.pipeline.create_pipeline(self.jenkins, *args)
+            result = pipeline.create_pipeline(self.jenkins, *args)
             sendStream("stdout", result)
         except:
             sendStream("stdout", "ERROR")
 
     def deletePipeline(self, *args):
         try:
-            result = core.pipeline.delete_pipeline(self.jenkins, *args)
+            result = pipeline.delete_pipeline(self.jenkins, *args)
             sendStream("stdout", result)
         except:
             sendStream("stdout", "ERROR")
 
     def modifyPipeline(self, *args):
         try:
-            result = core.pipeline.modify_pipeline(self.jenkins, *args)
+            result = pipeline.modify_pipeline(self.jenkins, *args)
             sendStream("stdout", result)
         except:
             sendStream("stdout", "ERROR")
@@ -93,9 +96,9 @@ if __name__ == "__main__":
         }
     }
     json_obj = json.dumps(json_obj)
-    test = PipelineInterface("http://localhost:8080", 'test', 'test')
-    test.createPipeline('nodetest', "https://github.com/contentful/the-example-app.nodejs", json_obj, "*/master", 'tokensample')
-    test.runPipeline('nodetest', False)
+    test = PipelineInterface("http://127.0.0.1:8080", 'test', 'test')
+    #test.createPipeline('nodtest', "https://github.com/contentful/the-example-app.nodejs", json_obj, "*/master", 'tokensample')
+    test.runPipeline('nodetest/master')
     print("DEBUGGING..")
 
 
