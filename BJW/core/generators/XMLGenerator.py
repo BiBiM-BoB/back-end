@@ -30,7 +30,7 @@ class XMLGenerator(GeneratorBase):
         it = self.root.iter(target_tag)
         for target in it:
             original = target.text
-            modified = original.replace("bibim", value)
+            modified = original.replace("$bibim", value)
 
             target.text = modified
         self.target_xml.write(self.xml_path, method='html', encoding='utf-8', xml_declaration=True)
@@ -40,7 +40,8 @@ class XMLGenerator(GeneratorBase):
             self.replace_content(item[0], item[1])
 
     def post_action(self):
-        return self.xml_path
+        xml = open(self.xml_path, 'r').read()
+        return xml
 
 if __name__ == "__main__":
     test = XMLGenerator('test_pipe_name',

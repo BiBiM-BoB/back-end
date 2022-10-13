@@ -4,8 +4,7 @@ Back-end nodejs/nestjs와의 통신을 위한 interface 입니다.
 import sys
 
 import core.pipeline
-from jenkinsapi.jenkins import Jenkins
-from jenkinsapi.utils.crumb_requester import CrumbRequester
+from api4jenkins import Jenkins
 
 from core.init import auto_init
 
@@ -19,8 +18,7 @@ def sendStream(stream, string):
 
 
 def getJenkinsInstance(url, username, password):
-    crumb = CrumbRequester(username=username, password=password, baseurl=url)
-    server = Jenkins(url, username=username, password=password, requester=crumb)
+    server = Jenkins(url, auth=(username, password))
     print("[+] Successfully connencted to Jenkins Server!")
     return server
 
@@ -44,18 +42,22 @@ class PipelineInterface:
         auto_init()
         self.jenkins = getJenkinsInstance(url, username, password)
 
-    def runPipeline(self, *args):
-        try:
-            result = core.pipeline.run_pipeline(self.jenkins, *args)
-            sendStream("stdout", result)
-        except:
-            sendStream("stdout", "ERROR")
+    def runPipeline(self, pipeline_name: str, getlogger: bool):
+        logger = core.pipeline.run_pipeline(self.jenkins, pipeline_name)
+        if getlogger:
+            return logger
+        else:
+            for line in logger.progressive_output():
+                print(line)
 
 
     def createPipeline(self, *args):
-        # *args : pipeline_name, git_path, tool_json, branch, build_token
-        result = core.pipeline.create_pipeline(self.jenkins, *args)
-        sendStream("stdout", result)
+        try:
+            # *args : pipeline_name, git_path, tool_json, branch, build_token
+            result = core.pipeline.create_pipeline(self.jenkins, *args)
+            sendStream("stdout", result)
+        except:
+            sendStream("stdout", "ERROR")
 
     def deletePipeline(self, *args):
         try:
@@ -92,7 +94,8 @@ if __name__ == "__main__":
     }
     json_obj = json.dumps(json_obj)
     test = PipelineInterface("http://localhost:8080", 'test', 'test')
-    test.createPipeline('testnme', "https://github.com/digininja/DVWA", json_obj, "*/master", 'tokensample')
+    test.createPipeline('nodetest', "https://github.com/contentful/the-example-app.nodejs", json_obj, "*/master", 'tokensample')
+    test.runPipeline('nodetest', False)
     print("DEBUGGING..")
 
 

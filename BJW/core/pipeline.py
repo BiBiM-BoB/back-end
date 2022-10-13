@@ -1,6 +1,7 @@
-from jenkinsapi.jenkins import Jenkins
+from api4jenkins import Jenkins
 from .generators.JenkinsfileGenerator import JenkinsfileGenerator
 from .generators.XMLGenerator import XMLGenerator
+import time
 
 
 def create_pipeline(jenkins: Jenkins, pipeline_name, git_path, tool_json, branch, build_token):
@@ -30,9 +31,12 @@ def modify_pipeline(jenkins: Jenkins, pipeline_name, workspace_path, tool_list, 
 
 def run_pipeline(jenkins: Jenkins, pipeline_name, *args):
     # *args here is build parameters
-    job_instance = jenkins.build_job(pipeline_name, *args)
+    job_instance = jenkins.build_job(pipeline_name)
+    while not job_instance.get_build():
+        time.sleep(1)
+    print(f"[+] Build {pipeline_name} started!")
 
-    return "runPipeline Succeed!"
+    return job_instance.get_build()
 
 
 def create_multibranch_pipeline():
@@ -57,5 +61,5 @@ if __name__ == "__main__":
         }
     }
     json_obj = json.dumps(json_obj)
-    jenkins = Jenkins("http://localhost:8080", 'test', 'test')
+    jenkins = Jenkins("http://localhost:8080", auth=('test', 'test'))
     create_pipeline(jenkins, 'test_pipe_name', "https://github.com/digininja/DVWA", json_obj, "*/master", 'tokensample')

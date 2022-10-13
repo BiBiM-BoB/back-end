@@ -1,0 +1,5 @@
+GitPython==3.1.29
+api4jenkins==1.13
+requests==2.28.1
+urllib3==1.26.12
+charset-normalizer==2.1.1

@@ -66,14 +66,12 @@ def init_tools_xml():
             for subdirname in dirnames:
                 ET.SubElement(root, subdirname)
         elif dirnames:
-            print("2: " + str(parents))
             temp = get_element_by_parent_list(root, parents)
             temp.attrib["num"] = str(len(dirnames))
             for subdirname in dirnames:
                 ET.SubElement(temp, subdirname)
                 # ET.SubElement(parents[-1], subdirname)
         else:
-            print("3: " + str(parents))
             get_element_by_parent_list(root, parents).text = str(len(filenames))
 
     with open(component_dir + 'tools.xml', "wb") as file:
@@ -99,7 +97,6 @@ def order_to_file(order):
         file = open(os.path.join(component_dir + order[0], str(order[1])))
         text = file.read()
         file.close()
-    print(text)
     return text
 
 
