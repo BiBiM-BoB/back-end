@@ -1,12 +1,19 @@
+from crypt import methods
 from flask import Blueprint, request, jsonify
 from sqlalchemy import and_
-from ..utils.db import *
+from datetime import datetime
+import json
+
 from ..models import db
 from ..models.pipeline import *
 from ..models.user import User
+from ..models.jenkins_has_tool import JenkinsHasTool, jenkins_has_tools_schema
+from ..models.tool import Tool
+
+from ..utils.db import *
 from ..utils.response import resp
 from ..utils.login import login_required
-from datetime import datetime
+from ..utils.BJW.Interface import *
 
 
 bp = Blueprint('pipeline', __name__, url_prefix='/api/v1/pipeline')
@@ -19,14 +26,43 @@ def create_pipeline():
         
         if(not params['pipeline_name'] or not params['repo_url'] or not params['jenkins_id'] or not params['owner_id']):
             return resp(400, "check your values")
+        
+        tools = JenkinsHasTool.query\
+            .join(Tool, JenkinsHasTool.tool_id == Tool.id)\
+            .add_columns(Tool.name)\
+            .filter(and_(JenkinsHasTool.jenkins_id == params['jenkins_id'], JenkinsHasTool.deleteAt == None))\
+            .all()
 
-        user_match = User.query.filter(and_(User.id == params['owner_id'], User.deleteAt == None)).first()
-        if(user_match):
-            result = Pipeline(params['pipeline_name'], params['repo_url'], params['jenkins_id'], params['owner_id'])
-            db_apply([result])
-            return resp(201, "create pipeline success")
-        else:
-            return resp(400, "create pipeline failed")
+        # test = jenkins_has_tools_schema.dump(tools)
+        # tool_list = list()
+        # for tool in tools:
+        #     tool_list.append(tool.name)
+        # print(params['pipeline_name'])
+        # result = PipelineInterface.createPipeline("http://localhost:8080", params["pipeline_name"], params["repo_url"], tool_list, "main", "token")
+        # print(result)
+
+        json_obj = {
+            'DAST': {
+                'ZAP': 1
+            },
+            'SAST': {
+                'CodeQL': 1
+            },
+            'SCA': {
+                'DependencyCheck': 0
+            },
+            'SIS': {
+                'GGShield': 0,
+                'GitLeaks': 0
+            }
+        }
+        # 'nodetest', "https://github.com/contentful/the-example-app.nodejs", json_obj, "*/master", 'tokensample'
+        json_obj = json.dumps(json_obj)
+        test = PipelineInterface("http://125.129.67.129:8080", 'test', 'test')
+        result = test.createPipeline('testtest', "https://github.com/contentful/the-example-app.nodejs", json_obj, "*/master", 'tokensample')
+        
+
+        return resp(201, "create pipeline success")
 
     except Exception as e:
         print(e)
@@ -73,6 +109,7 @@ def update_pipeline(id):
         return resp(500, "update pipeline failed")
 
 @bp.route('/deletePipeline/<id>', methods=['POST'])
+# @login_required
 def delete_pipeline(id):
     try:
         # 권한체크
@@ -90,3 +127,23 @@ def delete_pipeline(id):
     except Exception as e:
         print(e)
         return resp(500, "delete pipeline failed")
+
+@bp.route('/runPipeline', methods=['POST'])
+# @login_required
+def run_pipeline():
+    try:
+        params = request.get_json()
+        
+        if(not params['pipeline_id']):
+            return resp(400, "check your values")
+        
+        pipeline_match = Pipeline.query.filter(and_(Pipeline.id == params['pipeline_id'], Pipeline.deleteAt == None)).first()
+        
+        if(pipeline_match):
+            PipelineInterface.runPipeline()
+            return resp(200, "run pipeline success")
+        else:
+            return resp(400, "run failed")
+    except Exception as e:
+        print(e)
+        return resp(500, "run pipeline failed")

@@ -1,0 +1,17 @@
+<!-- <root><BUILD num="1"><NodeJS>3</NodeJS></BUILD><SCA>0</SCA><SAST num="1"><CodeQL>1</CodeQL></SAST><DAST num="1"><ZAP>4</ZAP></DAST><FUNC>2</FUNC><SIS num="1"><Pre-commit>0</Pre-commit></SIS></root> -->
+<root>
+  <BUILD num="1">
+    <NodeJS>3</NodeJS>
+  </BUILD>
+  <SCA>0</SCA>
+  <SAST num="1">
+    <CodeQL>1</CodeQL>
+  </SAST>
+  <DAST num="1">
+    <ZAP>4</ZAP>
+  </DAST>
+  <FUNC>2</FUNC>
+  <SIS num="1">
+    <Pre-commit>0</Pre-commit>
+  </SIS>
+</root>

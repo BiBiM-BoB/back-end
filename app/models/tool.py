@@ -1,6 +1,7 @@
 from sqlalchemy.orm import relationship
 from ..models import db, ma
 from datetime import datetime
+from ..models.jenkins_has_tool import JenkinsHasToolSchema
 
 class Tool(db.Model):
     __tablename__ = 'tools'

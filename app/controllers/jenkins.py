@@ -73,7 +73,8 @@ def create_jenkinsfile():
     except Exception as e:
         print(e)
         return resp(500, "failed")
-        
+
+
 
 @bp.route('/signupPipeline/<id>', methods=['GET'])
 # @login_required

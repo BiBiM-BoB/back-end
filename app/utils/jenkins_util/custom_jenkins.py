@@ -1,6 +1,5 @@
 from .DAST import *
 
-
 Jenkinsfile_path = "/home/bibim/bibim/Jenkins-files/"
 library_path = "/home/bibim/back-end/app/utils/jenkins_util/components/"
 

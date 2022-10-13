@@ -37,7 +37,8 @@ def create_tool_name():
 # @login_required
 def tool_list():
     try:
-        all_result = Tool.query.filter(Tool.deleteAt == None)
+        # all_result = Tool.query.filter(Tool.deleteAt == None)
+        all_result = Tool.query.with_entities(Tool.id, Tool.name, Tool.stage).filter(Tool.deleteAt == None)
         result = tools_schema.dump(all_result)
 
         return resp(200, "success", result)
