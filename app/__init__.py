@@ -19,7 +19,7 @@ def create_app():
     # CORS
     CORS(app)
 
-    # routing
+    # routing용 함수 만들기
     from .controllers import user, pipeline, security_result, test_render, jenkins, tool
     
     app.register_blueprint(test_render.bp)

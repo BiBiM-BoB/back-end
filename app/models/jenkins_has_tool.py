@@ -16,6 +16,9 @@ class JenkinsHasTool(db.Model):
         self.jenkins_id = jenkins_id
         self.tool_id = tool_id
 
+    def __repr__():
+        pass
+
 class JenkinsHasToolSchema(ma.Schema):
     class Meta:
         fields = ('id', 'jenkins_id', 'tool_id', 'createAt', 'updateAt', 'deleteAt')

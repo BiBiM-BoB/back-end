@@ -1,6 +1,10 @@
 import os
 from git import Repo
 from ..utils.localgit import push
+from dotenv import load_dotenv
+
+load_dotenv()
+JENKINS_URL = os.environ.get("JENKINS_URL")
 
 
 def commit_all(gitdir, commit_message):
@@ -19,10 +23,10 @@ class GeneratorBase:
     """Super Class"""
     user = os.getlogin()
     #localgitdir = f'/home/{user}/bibim/resources_git/'
-    localgitdir = f'http://localhost:8080/userContent.git/'
+    localgitdir = f'{JENKINS_URL}/userContent.git/'
 
     def commit(self, message):
-        commit_all(self.localgitdir, message)
+        commit_all(f'/home/{self.user}/bibim/userContent', message)
         push(self.localgitdir, f'/home/{self.user}/bibim/userContent')
 
 

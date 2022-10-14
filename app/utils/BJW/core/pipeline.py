@@ -5,7 +5,7 @@ import time
 
 
 def create_pipeline(jenkins: Jenkins, pipeline_name, git_path, tool_json, branch, bibim_git_dir, build_token):
-    localgitdir, jenkinsfile = JenkinsfileGenerator(pipeline_name, tool_json, bibim_git_dir).post_action()
+    localgitdir, jenkinsfile = JenkinsfileGenerator(pipeline_name, tool_json).post_action()
     xml = XMLGenerator(pipeline_name,
                        ("remote", git_path),
                        ("url", bibim_git_dir),
@@ -37,7 +37,7 @@ def run_pipeline(jenkins: Jenkins, pipeline_name, *args):
         time.sleep(1)
     print(f"[+] Build {pipeline_name} started!")
 
-    return job_instance.get_build()
+    # return job_instance.get_build()
 
 
 def create_multibranch_pipeline():

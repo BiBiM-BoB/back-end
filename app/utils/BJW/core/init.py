@@ -22,7 +22,7 @@ def create_resources_git(jenkinsurl):
     path = f'/home/{user}/bibim/userContent/'
     try:
         clone_or_pull(jenkinsurl+"/userContent.git", f'/home/{user}/bibim')
-
+        print("shinal")
         if not os.path.isdir(path + 'xmls/'):
             os.mkdir(path + 'xmls/')
         if not os.path.isdir(path + 'Jenkinsfiles/'):

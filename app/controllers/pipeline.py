@@ -39,6 +39,9 @@ def create_pipeline():
             .add_columns(Tool.name, Tool.stage)\
             .filter(and_(JenkinsHasTool.jenkins_id == params['jenkins_id'], JenkinsHasTool.deleteAt == None))\
             .all()
+        print("+===============")
+        print(tools)
+        print(jenkins_has_tools_schema.dump(tools))
 
         tools_dict = {}
         for tool in tools:
@@ -51,7 +54,7 @@ def create_pipeline():
         tools_dict = json.dumps(tools_dict)
         print(tools_dict)
         pipeline = PipelineInterface(JENKINS_URL, JENKINS_ID, JENKINS_PW)
-        result = pipeline.createPipeline(params['pipeline_name'], params['repo_url'], tools_dict, f"*/{params['branch']}", params["jenkins_token"])
+        result = pipeline.createPipeline(params['pipeline_name'], params['repo_url'], tools_dict, f"*/{params['branch']}", JENKINS_URL, params["jenkins_token"])
 
         return resp(201, "create pipeline success")
     except Exception as e:
@@ -123,17 +126,18 @@ def delete_pipeline(id):
 def run_pipeline():
     try:
         params = request.get_json()
-        
-        if(not params['pipeline_id']):
+
+        if( not params['pipeline_name'] or not params['branch']):
             return resp(400, "check your values")
         
-        pipeline_match = Pipeline.query.filter(and_(Pipeline.id == params['pipeline_id'], Pipeline.deleteAt == None)).first()
+
+        pipeline = PipelineInterface(JENKINS_URL, JENKINS_ID, JENKINS_PW)
         
-        if(pipeline_match):
-            PipelineInterface.runPipeline()
-            return resp(200, "run pipeline success")
-        else:
-            return resp(400, "run failed")
+        pipeline.runPipeline(f"{params['pipeline_name']}/{params['branch']}")
+        
+        return resp(200, "test")
+        
+        
     except Exception as e:
         print(e)
         return resp(500, "run pipeline failed")
