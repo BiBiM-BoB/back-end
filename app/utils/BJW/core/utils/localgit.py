@@ -26,6 +26,22 @@ def commit_all(gitdir, commit_message):
         return False
     return True
 
+def clone_or_pull(gitdir, localdir):
+    repo = Repo(gitdir)
+    try:
+        repo.clone(localdir)
+        print(f"[+] Cloned from {gitdir}!")
+    except:
+        repo.remotes.origin.pull()
+        print(f"[+] Already cloned, so pulled from {gitdir}!")
+
+def push(gitdir, localdir):
+    repo = Repo.clone_from(gitdir, localdir)
+    try:
+        repo.remotes.origin.push()
+    except Exception as e:
+        print(f"[-] Push failed, ERROR: {e}...")
+
 
 if __name__ == "__main__":
     create_git("eh")

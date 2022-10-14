@@ -41,7 +41,7 @@ class JenkinsInterface:
 # TODO sendStream -> stderr
 class PipelineInterface:
     def __init__(self, url, username, password):
-        auto_init()
+        auto_init(url)
         self.url = url
         self.username = username
         self.password = password
@@ -97,7 +97,7 @@ if __name__ == "__main__":
     }
     json_obj = json.dumps(json_obj)
     test = PipelineInterface("http://127.0.0.1:8080", 'test', 'test')
-    #test.createPipeline('nodtest', "https://github.com/contentful/the-example-app.nodejs", json_obj, "*/master", 'tokensample')
+    test.createPipeline('nodtest', "https://github.com/OneDayGinger/the-example-app.nodejs", json_obj, "*/master", 'tokensample')
     test.runPipeline('nodetest/master')
     print("DEBUGGING..")
 
