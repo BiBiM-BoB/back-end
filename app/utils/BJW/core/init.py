@@ -1,4 +1,4 @@
-from .utils.localgit import create_git, commit_all
+from .utils.localgit import create_git, commit_all, clone_or_pull, push
 import os
 import shutil
 
@@ -16,17 +16,17 @@ def create_bibim_folder():
     return path
 
 
-def create_resources_git():
+def create_resources_git(jenkinsurl):
     print("[+] Creating local 'bibim' git ...")
     user = os.getlogin()
-    path = f'/home/{user}/bibim/resources_git/'
+    path = f'/home/{user}/bibim/userContent/'
     try:
-        create_git(path)
-        print(f"[+] Created local git on {path}!")
+        clone_or_pull(jenkinsurl+"/userContent.git", f'/home/{user}/bibim')
 
-        os.mkdir(path + 'xmls/')
-
-        os.mkdir(path + 'Jenkinsfiles/')
+        if not os.path.isdir(path + 'xmls/'):
+            os.mkdir(path + 'xmls/')
+        if not os.path.isdir(path + 'Jenkinsfiles/'):
+            os.mkdir(path + 'Jenkinsfiles/')
 
         commit_all(path, "initial commit")
 
@@ -44,10 +44,10 @@ def create_resources_git():
     return True
 
 
-def auto_init():
+def auto_init(jenkinsurl):
     print("==================== INITIALIZING ====================")
     create_bibim_folder()
-    create_resources_git()
+    create_resources_git(jenkinsurl)
     print("============== Finished initialization! ==============")
 
 
