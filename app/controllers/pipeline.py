@@ -3,6 +3,8 @@ from flask import Blueprint, request, jsonify
 from sqlalchemy import and_
 from datetime import datetime
 import json
+from dotenv import load_dotenv
+import os
 
 from ..models import db
 from ..models.pipeline import *
@@ -15,8 +17,13 @@ from ..utils.response import resp
 from ..utils.login import login_required
 from ..utils.BJW.Interface import *
 
+load_dotenv()
+JENKINS_URL = os.environ.get("JENKINS_URL")
+JENKINS_ID = os.environ.get("JENKINS_ID")
+JENKINS_PW = os.environ.get("JENKINS_PW")
 
 bp = Blueprint('pipeline', __name__, url_prefix='/api/v1/pipeline')
+
 
 @bp.route('/createPipeline', methods=['POST'])
 # @login_required
@@ -24,46 +31,29 @@ def create_pipeline():
     try:
         params = request.get_json()
         
-        if(not params['pipeline_name'] or not params['repo_url'] or not params['jenkins_id'] or not params['owner_id']):
+        if(not params['pipeline_name'] or not params['repo_url'] or not params['jenkins_id'] or not params["jenkins_token"] or not params["branch"]):
             return resp(400, "check your values")
         
         tools = JenkinsHasTool.query\
             .join(Tool, JenkinsHasTool.tool_id == Tool.id)\
-            .add_columns(Tool.name)\
+            .add_columns(Tool.name, Tool.stage)\
             .filter(and_(JenkinsHasTool.jenkins_id == params['jenkins_id'], JenkinsHasTool.deleteAt == None))\
             .all()
 
-        # test = jenkins_has_tools_schema.dump(tools)
-        # tool_list = list()
-        # for tool in tools:
-        #     tool_list.append(tool.name)
-        # print(params['pipeline_name'])
-        # result = PipelineInterface.createPipeline("http://localhost:8080", params["pipeline_name"], params["repo_url"], tool_list, "main", "token")
-        # print(result)
+        tools_dict = {}
+        for tool in tools:
+            if tool.stage in tools_dict.keys():
+                tools_dict[tool.stage][tool.name] = 1
+            else:
+                row = { f"{tool.name}": 1 }
+                tools_dict[tool.stage] = row
 
-        json_obj = {
-            'DAST': {
-                'ZAP': 1
-            },
-            'SAST': {
-                'CodeQL': 1
-            },
-            'SCA': {
-                'DependencyCheck': 0
-            },
-            'SIS': {
-                'GGShield': 0,
-                'GitLeaks': 0
-            }
-        }
-        # 'nodetest', "https://github.com/contentful/the-example-app.nodejs", json_obj, "*/master", 'tokensample'
-        json_obj = json.dumps(json_obj)
-        test = PipelineInterface("http://125.129.67.129:8080", 'test', 'test')
-        result = test.createPipeline('testtest', "https://github.com/contentful/the-example-app.nodejs", json_obj, "*/master", 'tokensample')
-        
+        tools_dict = json.dumps(tools_dict)
+        print(tools_dict)
+        pipeline = PipelineInterface(JENKINS_URL, JENKINS_ID, JENKINS_PW)
+        result = pipeline.createPipeline(params['pipeline_name'], params['repo_url'], tools_dict, f"*/{params['branch']}", params["jenkins_token"])
 
         return resp(201, "create pipeline success")
-
     except Exception as e:
         print(e)
         return resp(500, "create pipeline failed")

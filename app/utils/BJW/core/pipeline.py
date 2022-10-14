@@ -13,6 +13,7 @@ def create_pipeline(jenkins: Jenkins, pipeline_name, git_path, tool_json, branch
                        ("name", branch),
                        # ("authToken", build_token)
                        ).post_action()
+    
     job_instance = jenkins.create_job(pipeline_name, xml)
 
     return "createPipeline Succeed!"
