@@ -77,8 +77,8 @@ class JenkinsfileGenerator(GeneratorBase):
 
         self.tool_list = self._json_to_list(self.input_json)
 
-        self.generate_jenkinsfile(self.tool_list)
-        self.commit("Generated Jenkinsfile {pipeline_name}")
+        self._generate_jenkinsfile(self.tool_list)
+        self._commit(f"Generated Jenkinsfile {pipeline_name}")
 
     def _find_stage(self, stage: str, tool_list):
         ret = []
@@ -141,6 +141,7 @@ class JenkinsfileGenerator(GeneratorBase):
                 else:
                     file.close()
                     stages += text
+        print(stages)
 
         return stages
 
@@ -154,8 +155,8 @@ class JenkinsfileGenerator(GeneratorBase):
         jenkinsfile.write(self._write_stages('FUNC', 'stop'))
         jenkinsfile.close()
 
-    def _post_action(self):
-        return self.localgitdir, "Jenkinsfiles/" + self.pipeline_name
+    def post_action(self):
+        return self.remotegitdir, "Jenkinsfiles/" + self.pipeline_name
 
 if __name__ == "__main__":
     json_obj = {

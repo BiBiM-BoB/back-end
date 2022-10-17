@@ -30,7 +30,7 @@ bp = Blueprint('pipeline', __name__, url_prefix='/api/v1/pipeline')
 def create_pipeline():
     try:
         params = request.get_json()
-        
+
         if(not params['pipeline_name'] or not params['repo_url'] or not params['jenkins_id'] or not params["jenkins_token"] or not params["branch"]):
             return resp(400, "check your values")
         
@@ -54,7 +54,7 @@ def create_pipeline():
         tools_dict = json.dumps(tools_dict)
         print(tools_dict)
         pipeline = PipelineInterface(JENKINS_URL, JENKINS_ID, JENKINS_PW)
-        result = pipeline.createPipeline(params['pipeline_name'], params['repo_url'], tools_dict, f"*/{params['branch']}", JENKINS_URL, params["jenkins_token"])
+        result = pipeline.createPipeline(params['pipeline_name'], params['repo_url'], tools_dict, f"*/{params['branch']}", params["jenkins_token"])
 
         return resp(201, "create pipeline success")
     except Exception as e:

@@ -20,25 +20,26 @@ def commit_all(gitdir, commit_message):
     try:
         repo.index.add('**')
         repo.index.commit(commit_message)
-        print("[+] Commited all changed files.")
+        print(f"[+] Commited all changed files, commit message: {commit_message}")
     except:
         print("[-] Git commit failed...")
         return False
     return True
 
 def clone_or_pull(gitdir, localdir):
-    repo = Repo(gitdir)
     try:
-        repo.clone(localdir)
+        repo = Repo.clone_from(gitdir, localdir)
         print(f"[+] Cloned from {gitdir}!")
     except:
+        repo = Repo(localdir)
         repo.remotes.origin.pull()
         print(f"[+] Already cloned, so pulled from {gitdir}!")
 
-def push(gitdir, localdir):
-    repo = Repo.clone_from(gitdir, localdir)
+def push(localdir):
+    repo = Repo(localdir)
     try:
         repo.remotes.origin.push()
+        print("[+] Pushed all changes!")
     except Exception as e:
         print(f"[-] Push failed, ERROR: {e}...")
 

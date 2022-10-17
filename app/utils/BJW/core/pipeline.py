@@ -4,11 +4,11 @@ from .generators.XMLGenerator import XMLGenerator
 import time
 
 
-def create_pipeline(jenkins: Jenkins, pipeline_name, git_path, tool_json, branch, bibim_git_dir, build_token):
-    localgitdir, jenkinsfile = JenkinsfileGenerator(pipeline_name, tool_json).post_action()
+def create_pipeline(jenkins: Jenkins, pipeline_name, git_path, tool_json, branch, build_token):
+    remotegitdir, jenkinsfile = JenkinsfileGenerator(pipeline_name, tool_json).post_action()
     xml = XMLGenerator(pipeline_name,
                        ("remote", git_path),
-                       ("url", bibim_git_dir),
+                       ("url", remotegitdir),
                        ("remoteJenkinsFile", jenkinsfile),
                        ("name", branch),
                        # ("authToken", build_token)

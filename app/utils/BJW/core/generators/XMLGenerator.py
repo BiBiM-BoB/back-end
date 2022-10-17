@@ -13,7 +13,7 @@ class XMLGenerator(GeneratorBase):
         self.replace_contents(*args)
         self.finishXML()
 
-        self.commit(f"Generated {pipeline_name}.xml")
+        self._commit(f"Generated {pipeline_name}.xml")
 
     def copyXML(self):
         shutil.copyfile(self.localgitdir + "xmls/config.xml", self.xml_path)

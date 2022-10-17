@@ -12,7 +12,7 @@ def commit_all(gitdir, commit_message):
     try:
         repo.index.add('**')
         repo.index.commit(commit_message)
-        print("[+] Commited all changed files.")
+        print(f"[+] Commited all changed files, commit message:{commit_message}")
     except:
         print("[-] Git commit failed...")
         return False
@@ -22,12 +22,12 @@ def commit_all(gitdir, commit_message):
 class GeneratorBase:
     """Super Class"""
     user = os.getlogin()
-    #localgitdir = f'/home/{user}/bibim/resources_git/'
-    localgitdir = f'{JENKINS_URL}/userContent.git/'
+    localgitdir = f'/home/{user}/bibim/userContent/'
+    remotegitdir = f'{JENKINS_URL}/userContent.git/'
 
-    def commit(self, message):
-        commit_all(f'/home/{self.user}/bibim/userContent', message)
-        push(self.localgitdir, f'/home/{self.user}/bibim/userContent')
+    def _commit(self, message):
+        commit_all(self.localgitdir, message)
+        push(self.localgitdir)
 
 
     def post_action(self):

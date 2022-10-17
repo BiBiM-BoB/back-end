@@ -16,40 +16,37 @@ def create_bibim_folder():
     return path
 
 
-def create_resources_git(jenkinsurl):
+def create_userContent(jenkinsurl):
     print("[+] Creating local 'bibim' git ...")
     user = os.getlogin()
     path = f'/home/{user}/bibim/userContent/'
+    if jenkinsurl[-1] != '/':
+        jenkinsurl += '/'
     try:
-        clone_or_pull(jenkinsurl+"/userContent.git", f'/home/{user}/bibim')
-        print("shinal")
-        if not os.path.isdir(path + 'xmls/'):
-            os.mkdir(path + 'xmls/')
-        if not os.path.isdir(path + 'Jenkinsfiles/'):
-            os.mkdir(path + 'Jenkinsfiles/')
-
-        commit_all(path, "initial commit")
-
+        clone_or_pull(jenkinsurl + "userContent.git", f'/home/{user}/bibim/userContent')
     except:
         print("[-] Local git already exists ...")
 
-    try:
-        shutil.copyfile(os.path.abspath('.') + "/app/utils/BJW/core/generators/resources/config.xml", path + "xmls/config.xml")
-        commit_all(path, "put config.xml")
+    if not os.path.isdir(path + 'xmls/'):
+        os.mkdir(path + 'xmls/')
+        shutil.copyfile(os.path.abspath('.') + "/app/utils/BJW/core/generators/resources/config.xml",
+                        path + "xmls/config.xml")
         print("[+] Created base config.xml file on git!")
+    if not os.path.isdir(path + 'Jenkinsfiles/'):
+        os.mkdir(path + 'Jenkinsfiles/')
+    if not os.path.isdir(path + 'components/'):
+        shutil.copytree(os.path.abspath('.') + "/app/utils/BJW/core/generators/resources/tools_components",
+                        path + 'components')
 
-    except:
-        print("[-] Base config.xml already exists ...")
-        return False
-    return True
+    commit_all(path, "initial commit")
 
 
 def auto_init(jenkinsurl):
     print("==================== INITIALIZING ====================")
     create_bibim_folder()
-    create_resources_git(jenkinsurl)
+    create_userContent(jenkinsurl)
     print("============== Finished initialization! ==============")
 
 
 if __name__ == "__main__":
-    auto_init()
+    auto_init("http://localhost:8080")
