@@ -12,7 +12,7 @@ from .core.init import auto_init
 
 
 def sendStream(stream, string):
-    print(string + "\n")
+    print(string)
     if stream == "stderr":
         sys.stderr.flush()
     elif stream == "stdout":
@@ -37,8 +37,6 @@ class JenkinsInterface:
 
 
 
-
-# TODO sendStream -> stderr
 class PipelineInterface:
     def __init__(self, url, username, password):
         auto_init(url)
@@ -47,7 +45,7 @@ class PipelineInterface:
         self.password = password
         self.jenkins = getJenkinsInstance(url, username, password)
 
-    def runPipeline(self, pipeline_name: str):
+    def runPipeline(self, pipeline_name: str, verbose=False):
         crumb = CrumbRequester(username=self.username, password=self.password, baseurl=self.url)
         jenkins = jenkinsapi.jenkins.Jenkins(self.url, username=self.username, password=self.password, requester=crumb)
         jenkins.build_job(pipeline_name)
@@ -55,19 +53,18 @@ class PipelineInterface:
 
 
     def createPipeline(self, *args):
-        # try:
-            # *args : pipeline_name, git_path, tool_json, branch, build_token
+        # *args : pipeline_name, git_path, tool_json, branch, build_token
+        try:
             result = pipeline.create_pipeline(self.jenkins, *args)
-        #     sendStream("stdout", result)
-        # except Exception as e:
-        #     sendStream("stdout", e)
+        except Exception as e:
+            sendStream("stdout", e)
 
     def deletePipeline(self, *args):
-        try:
-            result = pipeline.delete_pipeline(self.jenkins, *args)
-            sendStream("stdout", result)
-        except:
-            sendStream("stdout", "ERROR")
+        # *args : pipeline_name
+        # Deletes given pipeline
+        result = pipeline.delete_pipeline(self.jenkins, *args)
+        sendStream("stdout", result)
+        return result
 
     def modifyPipeline(self, *args):
         try:
@@ -76,40 +73,21 @@ class PipelineInterface:
         except:
             sendStream("stdout", "ERROR")
 
+    def getPipelines(self, *args):
+        # No argument is needed
+        # returns list of all pipelines
+        # ex: ['pipeline1', 'pipe2', ...]
+
+        try:
+            result = pipeline.get_pipeline(self.jenkins, *args)
+            sendStream("stdout", result)
+            return result
+        except Exception as e:
+            sendStream("stdout", e)
+
 
 
 if __name__ == "__main__":
-    import json
-    json_obj = {
-        'DAST': {
-            'ZAP': 1
-        },
-        'SAST': {
-            'CodeQL': 1
-        },
-        'SCA': {
-            'DependencyCheck': 0
-        },
-        'SIS': {
-            'GGShield': 0,
-            'GitLeaks': 0
-        }
-    }
-    json_obj = json.dumps(json_obj)
     test = PipelineInterface("http://127.0.0.1:8080", 'test', 'test')
-    test.createPipeline('nodtest', "https://github.com/OneDayGinger/the-example-app.nodejs", json_obj, "*/master", 'tokensample')
-    test.runPipeline('nodetest/master')
-    print("DEBUGGING..")
-
-
-
-
-    """
-    if len(sys.argv) < 2:
-        sendStream("stderr", "ERROR: No arguments!")
-    else:
-        interface = PipelineInterface()
-
-    PipelineInterface.func = getattr(PipelineInterface, sys.argv[1])
-    PipelineInterface.func(*sys.argv[2:])
-    """
+    test.deletePipeline('nodetest')
+    test.getPipelines()
