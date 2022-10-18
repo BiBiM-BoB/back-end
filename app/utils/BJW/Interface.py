@@ -67,6 +67,7 @@ class PipelineInterface:
         return result
 
     def modifyPipeline(self, *args):
+        # TODO: 기능이 덜 구현
         try:
             result = pipeline.modify_pipeline(self.jenkins, *args)
             sendStream("stdout", result)
