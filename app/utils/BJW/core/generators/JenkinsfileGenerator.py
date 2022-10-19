@@ -70,6 +70,7 @@ def order_to_file(order):
 
 class JenkinsfileGenerator(GeneratorBase):
     def __init__(self, pipeline_name, input_json):
+        print(input_json)
         self.pipeline_name = pipeline_name
         self.input_json = input_json
 

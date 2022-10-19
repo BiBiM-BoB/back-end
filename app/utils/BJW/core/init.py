@@ -23,6 +23,7 @@ def create_userContent(jenkinsurl):
     path = f'/home/{user}/bibim/userContent/'
     if jenkinsurl[-1] != '/':
         jenkinsurl += '/'
+
     try:
         clone_or_pull(jenkinsurl + "userContent.git", f'/home/{user}/bibim/userContent')
     except:
@@ -38,7 +39,6 @@ def create_userContent(jenkinsurl):
     if not os.path.isdir(path + 'components/'):
         shutil.copytree(os.path.abspath('.') + "/app/utils/BJW/core/generators/resources/tools_components",
                         path + 'components')
-
     commit_all(path, "initial commit")
 
 
