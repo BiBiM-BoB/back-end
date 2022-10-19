@@ -38,9 +38,6 @@ def create_pipeline():
             .add_columns(Tool.name, Tool.stage)\
             .filter(and_(JenkinsHasTool.jenkins_id == params['jenkins_id'], JenkinsHasTool.deleteAt == None))\
             .all()
-        print("+===============")
-        print(tools)
-        print(jenkins_has_tools_schema.dump(tools))
 
         tools_dict = {}
         for tool in tools:
@@ -51,8 +48,9 @@ def create_pipeline():
                 tools_dict[tool.stage] = row
 
         tools_dict = json.dumps(tools_dict)
-        print(tools_dict)
+
         pipeline = PipelineInterface(JENKINS_URL, JENKINS_ID, JENKINS_PW)
+        print("clear pipelineInterface =========")
         result = pipeline.createPipeline(params['pipeline_name'], params['repo_url'], tools_dict, f"*/{params['branch']}", params["jenkins_token"])
 
         return resp(201, "create pipeline success")
