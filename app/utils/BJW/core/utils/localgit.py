@@ -17,7 +17,6 @@ def create_git(gitdir):
 
 def commit_all(gitdir, commit_message):
     repo = Repo(gitdir)
-    print("NININI")
     try:
         repo.index.add('**')
         repo.index.commit(commit_message)
@@ -25,7 +24,6 @@ def commit_all(gitdir, commit_message):
     except:
         print("[-] Git commit failed...")
         return False
-    print("NININ")
     return True
 
 def clone_or_pull(gitdir, localdir):

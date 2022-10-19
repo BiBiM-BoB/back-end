@@ -38,12 +38,10 @@ def create_pipeline():
             .add_columns(Tool.name, Tool.stage)\
             .filter(and_(JenkinsHasTool.jenkins_id == params['jenkins_id'], JenkinsHasTool.deleteAt == None))\
             .all()
-        print("+===============")
-        print(tools)
-        print(jenkins_has_tools_schema.dump(tools))
 
         tools_dict = {}
         for tool in tools:
+            print(tool)
             if tool.stage in tools_dict.keys():
                 tools_dict[tool.stage][tool.name] = 1
             else:
