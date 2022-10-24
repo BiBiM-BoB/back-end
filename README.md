@@ -6,7 +6,7 @@ https://well-abrosaurus-bcd.notion.site/Back-End-7fcbd4b630b24fd5b5a97057a6cc76a
 
 ### 구성도
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/88534125/191064189-d075b828-7694-4ab0-9220-ec9f66d0121c.png">
+  <img src="https://user-images.githubusercontent.com/88534125/197490846-9c7b0048-342a-4ffc-9614-f5ef12a1cd18.png">
 </p>
 
 # app
