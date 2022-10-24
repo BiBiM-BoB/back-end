@@ -9,5 +9,23 @@ https://well-abrosaurus-bcd.notion.site/Back-End-7fcbd4b630b24fd5b5a97057a6cc76a
   <img src="https://user-images.githubusercontent.com/88534125/191064189-d075b828-7694-4ab0-9220-ec9f66d0121c.png">
 </p>
 
-### commit test
-commit을 테스트합니다~~
+# app
+## .env 설정
+JENKINS_URL= jenkins서버의 주소가 들어감
+JENKINS_ID= jenkins 서버의 ID
+JENKINS_PW= jenkins 서버의 Password
+BASE_JENKINS_PATH= jenkins file이 생성될 local directory path
+
+TOKEN_SECRET_KEY= token에 사용할 secret key string
+TOKEN_ALGORITHM= token 저장에 사용할 알고리즘
+
+### .env 예시
+```
+JENKINS_URL="IP:PORT"
+JENKINS_ID="test"
+JENKINS_PW="test"
+BASE_JENKINS_PATH="/home/bibim/my-jenkinsdir/"
+
+TOKEN_SECRET_KEY="secret-key"
+TOKEN_ALGORITHM="HS256"
+```
