@@ -30,8 +30,8 @@ def create_pipeline():
     try:
         params = request.get_json()
 
-        if(not params['pipeline_name'] or not params['repo_url'] or not params['jenkins_id'] or not params["jenkins_token"] or not params["branch"]):
-            return resp(400, "check your values")
+        # if(not params['pipeline_name'] or not params['repo_url'] or not params['jenkins_id'] or not params["jenkins_token"] or not params["branch"]):
+        #     return resp(400, "check your values")
         
         tools = JenkinsHasTool.query\
             .join(Tool, JenkinsHasTool.tool_id == Tool.id)\
@@ -50,7 +50,7 @@ def create_pipeline():
         tools_dict = json.dumps(tools_dict)
 
         pipeline = PipelineInterface(JENKINS_URL, JENKINS_ID, JENKINS_PW)
-        print("clear pipelineInterface =========")
+
         result = pipeline.createPipeline(params['pipeline_name'], params['repo_url'], tools_dict, f"*/{params['branch']}", params["jenkins_token"])
 
         return resp(201, "create pipeline success")
