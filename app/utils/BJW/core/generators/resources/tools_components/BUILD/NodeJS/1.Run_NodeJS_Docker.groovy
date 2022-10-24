@@ -3,7 +3,7 @@ stage('Run NodeJS Docker') {
     
     try { 
         def nodejs_container = nodejs_img.run("-dt --rm -p 3000:3000 -w /app/src -v ${env.WORKSPACE}:/app/src --name bibim-nodejs")
-    } catch {
+    } catch(error) {
         echo "Don't worry, program is in good status."
         stop_container('bibim-nodejs')
         def nodejs_container = nodejs_img.run("-dt --rm -p 3000:3000 -w /app/src -v ${env.WORKSPACE}:/app/src --name bibim-nodejs")

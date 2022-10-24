@@ -7,8 +7,6 @@ import xml.etree.ElementTree as ET
 from .GeneratorBase import GeneratorBase
 import json
 
-component_dir = "/home/bibim/back-end/app/utils/BJW/core/generators/resources/tools_components/"
-# component_dir = os.path.abspath('.') + "/home/bibim/back-end/app/utils/BJW/core/generators/resources/tools_components/"
 
 '''
 # Example of input json
@@ -39,40 +37,28 @@ json:
 tool_list = ['BUILD/NodeJS', 'DAST/ZAP', 'SAST/CodeQL', 'SCA/Dependabot', 'SIS/GGShield', 'SIS/GitLeaks']
 '''
 
-
-def get_element_by_parent_list(root, parent_list):
-    for parent in parent_list:
-        root = root.find(parent)
-    return root
-
-
-def order_to_file(order):
-    # 
-    if type(order) == str:
-        text = ""
-        tool = order.split('/')[-1]
-        for dirname, _, files in os.walk(component_dir + order + '/'):
-            files.sort()
-            for i in range(len(files)):
-                if int(files[i].split('.')[0]) > 0:
-                    files[i:], files[:i] = files[:i], files[i:]
-                    break
-            for file in files:
-                file = open(os.path.join(dirname, file), 'r')
-                text += file.read()
-                file.close()
-    else:
-        file = open(os.path.join(component_dir + order[0], str(order[1])))
-        text = file.read()
-        file.close()
-    return text
-
-
 class JenkinsfileGenerator(GeneratorBase):
     def __init__(self, pipeline_name, input_json):
-        print(input_json)
         self.pipeline_name = pipeline_name
-        self.input_json = input_json
+        #self.input_json = input_json
+        self.input_json = json.dumps({
+            'BUILD': {
+                'NodeJS': 1
+            },
+            'DAST': {
+                'ZAP': 1
+            },
+            'SAST': {
+                'CodeQL': 1
+            },
+            'SCA': {
+                'DependencyCheck': 0
+            },
+            'SIS': {
+                'GGShield': 0,
+                'GitLeaks': 0
+            }
+        })
 
         self.jenkinsfile_path = self.localgitdir + "Jenkinsfiles/" + pipeline_name
 
@@ -97,7 +83,7 @@ class JenkinsfileGenerator(GeneratorBase):
             for tool in input_json[stage].keys():
                 if input_json[stage][tool]:
                     tool_list.append(stage + '/' + tool)
-
+        print(tool_list)
         return tool_list
 
     # Let's say,
@@ -105,10 +91,10 @@ class JenkinsfileGenerator(GeneratorBase):
     def _write_stages(self, tool, part=None):
         # then this function will return Jenkinsfile components about running ZAP, which is variable 'stages' below.
         stages = ""
-
+        component_dir = self.localgitdir + 'components/'
         for dirname, _, files in os.walk(component_dir + tool + '/'):
+            print(component_dir + tool)
             files.sort()
-
             if not part:
                 for i in range(len(files)):
                     if int(files[i].split('.')[0]) > 0:
@@ -117,22 +103,23 @@ class JenkinsfileGenerator(GeneratorBase):
             
             elif part=='start':
                 for i in range(len(files)):
-                    if int(files[i].split('.')[0] > 0):
+                    if int(files[i].split('.')[0]) > 0:
                         files = files[i:]
                         break
             
             elif part=='stop':
                 for i in range(len(files)):
-                    if int(files[i].split('.')[0] > 0):
+                    if int(files[i].split('.')[0]) > 0:
                         files = files[:i]
                         break
 
             for file in files:
                 file = open(os.path.join(dirname, file), 'r')
                 text = file.read()
+                print(text)
                 if text[:6] == "$bibim":
                     file.close()
-                    stage_list = self._find_stage(text.split(':')[1])
+                    stage_list = self._find_stage(text.split(':')[1], self.tool_list)
                     # if component's content is '$bibim:SCA:start' : self._find_stage will return all sca tool list
                     # for example,
                     # stage_list = ['SCA/Dependabot', 'SCA/Dependency_check']
@@ -142,7 +129,6 @@ class JenkinsfileGenerator(GeneratorBase):
                 else:
                     file.close()
                     stages += text
-        print(stages)
 
         return stages
 
@@ -151,6 +137,7 @@ class JenkinsfileGenerator(GeneratorBase):
         jenkinsfile.write(self._write_stages('FUNC', 'start'))
 
         for tool in tool_list:
+            print(tool)
             jenkinsfile.write(self._write_stages(tool))
 
         jenkinsfile.write(self._write_stages('FUNC', 'stop'))

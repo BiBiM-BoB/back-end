@@ -41,6 +41,7 @@ def create_pipeline():
 
         tools_dict = {}
         for tool in tools:
+            print(tool)
             if tool.stage in tools_dict.keys():
                 tools_dict[tool.stage][tool.name] = 1
             else:
