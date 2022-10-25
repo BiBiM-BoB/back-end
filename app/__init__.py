@@ -1,9 +1,36 @@
 from flask import Flask
 from flask_cors import CORS
+from logging.config import dictConfig
+import os
 
 from .models import db, ma
 
 def create_app():
+    # logging config
+    dictConfig({
+        'version': 1,
+        'formatters': {
+            'default': {
+                'format': '[%(asctime)s] %(levelname)s in %(module)s: %(message)s',
+            }
+        },
+        'handlers': {
+            'file': {
+                'level': 'DEBUG',
+                'class': 'logging.handlers.RotatingFileHandler',
+                'filename': "/home/bibim/back-end/app/logs/bibim.app.log",
+                'maxBytes': 1024 * 1024 * 5,  # 5 MB
+                'backupCount': 5,
+                'formatter': 'default',
+            },
+        },
+        'root': {
+            'level': 'DEBUG',
+            'handlers': ['file']
+        }
+    })
+
+    # Flask app 시작
     app = Flask(__name__)
 
     app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://bibimbob:1q2w3e4r!@localhost:3306/devsecopsdb?charset=utf8mb4"
