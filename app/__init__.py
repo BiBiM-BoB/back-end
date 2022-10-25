@@ -1,9 +1,13 @@
 from flask import Flask
 from flask_cors import CORS
+from dotenv import load_dotenv
 from logging.config import dictConfig
 import os
 
 from .models import db, ma
+
+load_dotenv()
+LOGGING_PATH = os.environ.get("LOGGING_PATH")
 
 def create_app():
     # logging config
@@ -18,7 +22,7 @@ def create_app():
             'file': {
                 'level': 'DEBUG',
                 'class': 'logging.handlers.RotatingFileHandler',
-                'filename': "/home/bibim/back-end/app/logs/bibim.app.log",
+                'filename': os.path.join(LOGGING_PATH, "logs/bibim.app.log"),
                 'maxBytes': 1024 * 1024 * 5,  # 5 MB
                 'backupCount': 5,
                 'formatter': 'default',

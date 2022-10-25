@@ -10,7 +10,8 @@ https://well-abrosaurus-bcd.notion.site/Back-End-7fcbd4b630b24fd5b5a97057a6cc76a
 </p>
 
 # app
-## .env 설정
+## 실행 하기 위한 구성
+### .env 설정
 JENKINS_URL= jenkins서버의 주소가 들어감
 JENKINS_ID= jenkins 서버의 ID
 JENKINS_PW= jenkins 서버의 Password
@@ -18,6 +19,7 @@ BASE_JENKINS_PATH= jenkins file이 생성될 local directory path
 
 TOKEN_SECRET_KEY= token에 사용할 secret key string
 TOKEN_ALGORITHM= token 저장에 사용할 알고리즘
+LOGGING_PATH= 로그가 저장될 디렉토리 경로(자세한건 app의 __init__ 참조)
 
 ### .env 예시
 ```
@@ -28,4 +30,8 @@ BASE_JENKINS_PATH="/home/bibim/my-jenkinsdir/"
 
 TOKEN_SECRET_KEY="secret-key"
 TOKEN_ALGORITHM="HS256"
+LOGGING_PATH="/home/bibim/back-end/app/"
 ```
+
+### logs 디렉토리 생성 및 .log파일 생성
+LOGGING_PATH에 해당하는 위치에 logs 디렉토리를 생성 후, bibim.app.log 파일을 생성해야 함.
