@@ -9,6 +9,16 @@ https://well-abrosaurus-bcd.notion.site/Back-End-7fcbd4b630b24fd5b5a97057a6cc76a
   <img src="https://user-images.githubusercontent.com/88534125/197490846-9c7b0048-342a-4ffc-9614-f5ef12a1cd18.png">
 </p>
 
+# Git
+## 커밋 컨벤션(commit convention)
+https://well-abrosaurus-bcd.notion.site/github-e90a044191dd4d2dabe0a78453868a98
+
+## Branch
+```
+main: 최종 동작 소스코드 브랜치.(문제없이 실행되어야함)
+develop: 개발을 하기 위한 브랜치.(기본적으로 여기에서 작업하시면 됩니다)
+```
+
 # app
 ## 실행 하기 위한 구성
 ### .env 설정
