@@ -10,6 +10,8 @@ export class SecurityResultService {
   constructor(@InjectModel(SecurityResult.name) private securityResultModel: Model<SecurityResultDocument>) {}
 
   async create(createSecurityResultDto: CreateSecurityResultDto): Promise<SecurityResult> {
+    console.log(createSecurityResultDto.data[0].message.text);
+
     const createdSecuityResult = new this.securityResultModel(createSecurityResultDto);
     return createdSecuityResult.save();
   }
