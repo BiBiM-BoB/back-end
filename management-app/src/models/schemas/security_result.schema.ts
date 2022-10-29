@@ -6,13 +6,7 @@ export type SecurityResultDocument = SecurityResult & Document;
 @Schema()
 export class SecurityResult {
   @Prop()
-  name: string;
-
-  @Prop()
-  age: number;
-
-  @Prop()
-  location: string;
+  data: string;
 }
 
 export const SecurityResultSchema = SchemaFactory.createForClass(SecurityResult);
