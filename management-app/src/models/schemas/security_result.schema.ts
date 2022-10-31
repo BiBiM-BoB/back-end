@@ -1,13 +1,16 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, now } from 'mongoose';
 
 export type SecurityResultDocument = SecurityResult & Document;
 
 @Schema()
 export class SecurityResult {
 
-  @Prop()
+  @Prop({ default: now() })
   createdAt: Date;
+
+  @Prop({ default: now() })
+  updatedAt: Date;
 
   @Prop()
   data: [

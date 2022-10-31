@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpStatus, Param, Post, Put, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpStatus, Param, Post, Put, Res, UseFilters } from '@nestjs/common';
 
 import { CreateSecurityResultDto } from '../../models/dto/security_result.dto';
 import { SecurityResultService } from '../../services/security_result.service';
@@ -13,8 +13,14 @@ export class SecurityResultController {
   }
 
   @Post("/createSecurityResult")
-  saveSecurityResult(@Res() response, @Body() createSecurityResultDto: CreateSecurityResultDto) {
-    const test = this.securityResultService.create(createSecurityResultDto);
-    return response.status(HttpStatus.CREATED).json( {test} );
+  @UseFilters()
+  async saveSecurityResult(@Res() response, @Body() createSecurityResultDto: CreateSecurityResultDto) {
+    try{
+      await this.securityResultService.create(createSecurityResultDto);
+      return response.status(HttpStatus.CREATED).json();
+    } catch(e) {
+      console.log(e);
+      return response.status(HttpStatus.BAD_REQUEST).json();
+    }
   }
 }
