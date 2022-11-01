@@ -3,7 +3,7 @@ stage('Run ZAP Docker') {
     
     try { 
         def zap_container = zap_img.run("-dt --rm --name bibim-zap")
-    } catch {
+    } catch(error) {
         stop_container('bibim-zap')
         echo "Don't worry, program is in good status."
         def zap_container = zap_img.run("-dt --rm --name bibim-zap")

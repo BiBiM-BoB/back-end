@@ -21,8 +21,9 @@ def create_pipeline(jenkins: Jenkins, pipeline_name, git_path, tool_json, branch
 
 def delete_pipeline(jenkins: Jenkins, pipeline_name):
     job_instance = jenkins.delete_job(pipeline_name)
-
-    return "deletePipeline Succeed!"
+    if jenkins.get_job(pipeline_name):
+        return False
+    return True
 
 
 def modify_pipeline(jenkins: Jenkins, pipeline_name, workspace_path, tool_list, branch):
@@ -39,9 +40,11 @@ def run_pipeline(jenkins: Jenkins, pipeline_name, *args):
 
     # return job_instance.get_build()
 
-
-def create_multibranch_pipeline():
-    pass
+def get_pipeline(jenkins: Jenkins, *args):
+    pipeline_list = []
+    for job in jenkins.iter_jobs():
+        pipeline_list.append(job.full_name)
+    return pipeline_list
 
 if __name__ == "__main__":
     import json
