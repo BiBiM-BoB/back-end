@@ -1,4 +1,29 @@
+from pymongo import MongoClient
+from flask import current_app
+from bson import json_util
+from bson.objectid import ObjectId
+
+from app.utils.response import resp
+
+client = MongoClient('mongodb://localhost:27017/')
+mongo_db = client["test"] # 사용하는 db 명
+collection = mongo_db["securityresults"]
+
 class SecurityResultService:
-    # 요청에 따른 결과 파일 json 제공(mongodb 접근)
-    # 요청: 프로젝트마다, 전체 결과, 특정 날짜 등
-    pass
+    def find(id):
+        try:            
+            result = collection.find_one({ "_id": ObjectId(id) })    
+            return resp(200, "success", result)
+        except Exception as e:
+            current_app.logger.debug("securityresult find service error")
+            current_app.logger.debug(e)
+            return resp(500, "failed")
+
+    def all_list():
+        try:
+            result = collection.find()
+            # bson데이터 파싱
+            result = json_util.dumps(result)
+            return resp(200, "success", result)
+        except Exception as e:
+            return resp(500, "failed")

@@ -37,6 +37,7 @@ def create_app():
     # Flask app 시작
     app = Flask(__name__)
 
+    # mysql
     app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://bibimbob:1q2w3e4r!@localhost:3306/devsecopsdb?charset=utf8mb4"
     app.config['SQLALCHEMY_ECHO'] = True
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -46,6 +47,9 @@ def create_app():
 
     db.app = app
     db.create_all()
+
+    # mongodb
+    # mongodb의 경우 service에서 class 형태로 연동함.
 
     # CORS
     CORS(app)
