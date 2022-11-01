@@ -6,6 +6,12 @@ export type SecurityResultDocument = SecurityResult & Document;
 @Schema()
 export class SecurityResult {
 
+  @Prop()
+  stage: string;
+
+  @Prop()
+  tool: string;
+
   @Prop({ default: now() })
   createdAt: Date;
 
