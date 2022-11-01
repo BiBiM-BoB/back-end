@@ -1,14 +1,7 @@
-"""OneDayGinger
-
-"""
-
 import os
 import xml.etree.ElementTree as ET
 from .GeneratorBase import GeneratorBase
 import json
-
-component_dir = "/home/bibim/back-end/app/utils/BJW/core/generators/resources/tools_components/"
-# component_dir = os.path.abspath('.') + "/home/bibim/back-end/app/utils/BJW/core/generators/resources/tools_components/"
 
 '''
 # Example of input json
@@ -38,35 +31,6 @@ json:
 # Example of generated tool_list
 tool_list = ['BUILD/NodeJS', 'DAST/ZAP', 'SAST/CodeQL', 'SCA/Dependabot', 'SIS/GGShield', 'SIS/GitLeaks']
 '''
-
-
-def get_element_by_parent_list(root, parent_list):
-    for parent in parent_list:
-        root = root.find(parent)
-    return root
-
-
-def order_to_file(order):
-    # 
-    if type(order) == str:
-        text = ""
-        tool = order.split('/')[-1]
-        for dirname, _, files in os.walk(component_dir + order + '/'):
-            files.sort()
-            for i in range(len(files)):
-                if int(files[i].split('.')[0]) > 0:
-                    files[i:], files[:i] = files[:i], files[i:]
-                    break
-            for file in files:
-                file = open(os.path.join(dirname, file), 'r')
-                text += file.read()
-                file.close()
-    else:
-        file = open(os.path.join(component_dir + order[0], str(order[1])))
-        text = file.read()
-        file.close()
-    return text
-
 
 class JenkinsfileGenerator(GeneratorBase):
     def __init__(self, pipeline_name, input_json):
@@ -157,23 +121,3 @@ class JenkinsfileGenerator(GeneratorBase):
 
     def post_action(self):
         return self.remotegitdir, "Jenkinsfiles/" + self.pipeline_name
-
-if __name__ == "__main__":
-    json_obj = {
-        'DAST': {
-            'ZAP': 1
-        },
-        'SAST': {
-            'CodeQL': 1
-        },
-        'SCA': {
-            'DependencyCheck': 0
-        },
-        'SIS': {
-            'GGShield': 0,
-            'GitLeaks': 0
-        }
-    }
-    json_obj = json.dumps(json_obj)
-    test = JenkinsfileGenerator('test_pipeline_name', json_obj)
-    print("DEBUGGING")
