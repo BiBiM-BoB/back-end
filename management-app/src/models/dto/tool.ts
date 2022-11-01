@@ -1,20 +1,23 @@
 import { IsJSON, IsNotEmpty, IsNumber, IsObject, IsString, MaxLength } from "class-validator";
-export class CreateSecurityResultDto {
+export class ToolDto {
 
     @IsNotEmpty()
     @IsString()
-    readonly stage: string;
+    readonly id: number;
     
     @IsNotEmpty()
     @IsString()
-    readonly tool: string;
+    readonly name: string;
+
+    @IsNotEmpty()
+    readonly stage: string;
 
     @IsNotEmpty()
     readonly createAt: Date;
-
-    @IsNotEmpty()
-    readonly updateAt: Date;
     
     @IsNotEmpty()
-    readonly data: object;
+    readonly updateAt: Date;
+
+    @IsNotEmpty()
+    readonly deleteAt: Date;
 }
