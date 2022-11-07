@@ -1,12 +1,7 @@
-"""OneDayGinger
-
-"""
-
 import os
 import xml.etree.ElementTree as ET
 from .GeneratorBase import GeneratorBase
 import json
-
 
 '''
 # Example of input json
@@ -40,25 +35,7 @@ tool_list = ['BUILD/NodeJS', 'DAST/ZAP', 'SAST/CodeQL', 'SCA/Dependabot', 'SIS/G
 class JenkinsfileGenerator(GeneratorBase):
     def __init__(self, pipeline_name, input_json):
         self.pipeline_name = pipeline_name
-        #self.input_json = input_json
-        self.input_json = json.dumps({
-            'BUILD': {
-                'NodeJS': 1
-            },
-            'DAST': {
-                'ZAP': 1
-            },
-            'SAST': {
-                'CodeQL': 1
-            },
-            'SCA': {
-                'DependencyCheck': 0
-            },
-            'SIS': {
-                'GGShield': 0,
-                'GitLeaks': 0
-            }
-        })
+        self.input_json = input_json
 
         self.jenkinsfile_path = self.localgitdir + "Jenkinsfiles/" + pipeline_name
 
@@ -116,7 +93,7 @@ class JenkinsfileGenerator(GeneratorBase):
             for file in files:
                 file = open(os.path.join(dirname, file), 'r')
                 text = file.read()
-                print(text)
+                
                 if text[:6] == "$bibim":
                     file.close()
                     stage_list = self._find_stage(text.split(':')[1], self.tool_list)
@@ -145,23 +122,3 @@ class JenkinsfileGenerator(GeneratorBase):
 
     def post_action(self):
         return self.remotegitdir, "Jenkinsfiles/" + self.pipeline_name
-
-if __name__ == "__main__":
-    json_obj = {
-        'DAST': {
-            'ZAP': 1
-        },
-        'SAST': {
-            'CodeQL': 1
-        },
-        'SCA': {
-            'DependencyCheck': 0
-        },
-        'SIS': {
-            'GGShield': 0,
-            'GitLeaks': 0
-        }
-    }
-    json_obj = json.dumps(json_obj)
-    test = JenkinsfileGenerator('test_pipeline_name', json_obj)
-    print("DEBUGGING")
