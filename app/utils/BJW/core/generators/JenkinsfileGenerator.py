@@ -1,8 +1,6 @@
 import os
 import json
-
 from .GeneratorBase import GeneratorBase
-
 '''
     1. Creates Jenkinsfile
     2. Commit to local git
@@ -69,7 +67,7 @@ class JenkinsfileGenerator(GeneratorBase):
             for file in files:
                 file = open(os.path.join(dirname, file), 'r')
                 text = file.read()
-                print(text)
+                
                 if text[:6] == "$bibim":
                     file.close()
                     stage_list = self._find_stage(text.split(':')[1], self.tool_list)
