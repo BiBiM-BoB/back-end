@@ -18,6 +18,18 @@ class SecurityResultService:
             current_app.logger.debug("securityresult find service error")
             current_app.logger.debug(e)
             return resp(500, "failed")
+        
+    def project_total_aggregate(id):
+        query = [
+            { "$match" : { "_id" : id  } },
+            { "$unwind" : "$data" },
+            { "$group" : { "_id" : "$data.properties.precision", "count" : { "$sum" : 1 } }}
+        ]
+        result = collection.aggregate(query)
+        
+        import pprint
+        pprint.pprint(list(result))
+        
 
     def all_list():
         try:

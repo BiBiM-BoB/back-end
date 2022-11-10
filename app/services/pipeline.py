@@ -19,21 +19,46 @@ JENKINS_URL = os.environ.get("JENKINS_URL")
 JENKINS_ID = os.environ.get("JENKINS_ID")
 JENKINS_PW = os.environ.get("JENKINS_PW")
 
+class PipelineSerialize:
+    def __init__(self, data):
+        self.data = data
+
+    def __str__(self):
+        print(f"PipelineSerialize Data: {self.data}")
+
+    def check(self):
+        if(not self.data['pipeline_name'] or not self.data['repo_url'] or not self.data['jenkins_id'] or not self.data["jenkins_token"] or not self.data["branch"]):
+            return False
+        else:
+            return True
+
+    def get_element(self, key):
+        return self.data[key]
+
+
+        
+
 class PipelineService:
     # 파이프라인 생성
     def create_pipeline():
         try:
-            params = request.get_json()
+            params = PipelineSerialize(request.get_json())
+        except Exception as e:
+            return resp(500, "create pipeline failed")
 
-            if(not params['pipeline_name'] or not params['repo_url'] or not params['jenkins_id'] or not params["jenkins_token"] or not params["branch"]):
+            if params.check() == False:
                 return resp(400, "check your values")
+                
             
             # jenkins파일이 가지고 있는 tool 목록들 가져오기
+            # if ( tools = JenKinsHasToolQuery):
+            #     resp(500)
             tools = JenkinsHasTool.query\
                 .join(Tool, JenkinsHasTool.tool_id == Tool.id)\
                 .add_columns(Tool.name, Tool.stage)\
                 .filter(and_(JenkinsHasTool.jenkins_id == params['jenkins_id'], JenkinsHasTool.deleteAt == None))\
                 .all()
+
 
             tools_dict = {}
             for tool in tools:
@@ -52,9 +77,6 @@ class PipelineService:
             result = pipeline.createPipeline(params['pipeline_name'], params['repo_url'], tools_dict, f"*/{params['branch']}", params["jenkins_token"])
 
             return resp(201, "create pipeline success")
-        except Exception as e:
-            print(e)
-            return resp(500, "create pipeline failed")
 
     # 파이프라인 리스트 return (한승이 모듈 사용하기)
     # def pipeline_list():
