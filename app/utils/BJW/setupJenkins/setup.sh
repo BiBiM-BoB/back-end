@@ -13,18 +13,11 @@ echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.
   $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
 # install docker and jre
-sudo apt install -y docker-ce docker-ce-cli containered.io
+sudo apt install -y docker-ce docker-ce-cli
 sudo apt-get install -y openjdk-11-jre
 
 sudo groupadd docker
-sudo usermod -aG docker "${WHOAMI}"
+sudo usermod -aG docker `whoami`
 
-sudo wget -P /home/Downloads/ https://get.jenkins.io/war-stable/2.361.1/jenkins.war
-
-java -jar jenkins.war --httpPort=8080 -Dhudson.plugins.git.GitSCM.ALLOW_LOCAL_CHECKOUT=true -Djenkins.install.runSetupWizard=false
-
-read -p "RESTART IS RECOMMENDED.. [Y/n]: " YESORNO
-
-if [ "${YESORNO}" == "Y" ] ; then
-  sudo init 6
-fi
+sudo docker build -t bibim-jenkins:0.1 .
+sudo docker volume create jenkins
