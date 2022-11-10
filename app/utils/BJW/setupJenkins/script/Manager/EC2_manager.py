@@ -30,14 +30,12 @@ class EC2Manager:
     def _establish_ssh(self):
         # connect this computer and target ec2
         # use RSA key verification
-        key = paramiko.RSAKey.from_private_key_file(
-            input('[?] Absolute path of your private key file: ')
-        )
+        key = paramiko.RSAKey.from_private_key_file(input('[?] Absolute path of your private key file: '))
         username = input('[?] Username of your ec2 account (default: ubuntu): ')
         if not username : username = 'ubuntu'
 
         ssh_client = paramiko.SSHClient()
-        ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy)
+        ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         ssh_client.connect(self.ec2.public_ip_address, username=username, pkey=key)
 
         return ssh_client
@@ -50,7 +48,7 @@ class EC2Manager:
         return channel
 
     def execute_command(self, command, verbose: bool):
-        _, stdout, = self.ssh.exec_command(command)
+        _, stdout,_ = self.ssh.exec_command(command)
 
         if verbose:
             for line in stdout.readlines():
@@ -109,3 +107,15 @@ class EC2Manager:
         
         # check if correctly uploaded
         self.execute_command('ls -al '+ to_path, True)
+
+if __name__ == "__main__":
+    from AWS_manager import AWSManager
+    import logging
+
+    logging.basicConfig()
+    logging.getLogger("paramiko").setLevel(logging.DEBUG)
+
+    debug = AWSManager()
+    test = EC2Manager(debug.return_ec2('TEST_EC2'))
+    test.upload_directory('C:\\dev\\study_bob\\git\\jinho_syshack\\bob11-master\\lec1', '/home/ubuntu/')
+    test.interactive_commandline()
