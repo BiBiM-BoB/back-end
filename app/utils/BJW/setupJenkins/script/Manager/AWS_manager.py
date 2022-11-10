@@ -32,9 +32,7 @@ class AWSManager:
 
         return session
 
-    def create_ec2(self, instance_name: str,
-                   # key_name='bibim_key',
-                   key_name='hskang_key',
+    def create_ec2(self, instance_name, key_name,
                    image_id='ami-058165de3b7202099',
                    instance_type='t3a.small',
                    security_group_id='sg-0aea7cc41003b6fcb',  # bibim_sg

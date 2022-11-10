@@ -17,7 +17,7 @@ import paramiko
 import sys
 import os
 
-import Interactive as interactive
+from . import Interactive as interactive
 
 class EC2Manager:
     def __init__(self, ec2_instance):
@@ -47,7 +47,7 @@ class EC2Manager:
 
         return channel
 
-    def execute_command(self, command, verbose: bool):
+    def execute_command(self, command, verbose=True):
         _, stdout,_ = self.ssh.exec_command(command)
 
         if verbose:
@@ -55,7 +55,7 @@ class EC2Manager:
                 line = str(line).replace('\n', '')
                 print(line)
     
-    def execute_channel(self, command, verbose: bool):
+    def execute_channel(self, command, verbose=True):
         self.channel.send(command + '\n')
 
         while True:
