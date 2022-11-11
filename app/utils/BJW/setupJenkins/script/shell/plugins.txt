@@ -1,4 +1,5 @@
-cucumber-testresult-plugin:0.8.2
-pam-auth:1.1
-matrix-project:1.4.1
-script-security:1.13
+git-userContent:1.4
+docker-plugin:1.2.10
+docker-workflow:528.v7c193a_0b_e67c
+remote-file:1.23
+blueocean:1.25.8

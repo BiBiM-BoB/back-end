@@ -20,20 +20,8 @@ RUN apt-get update && apt-get install -y docker-ce-cli
 # Jenkins plugins
 #
 
-RUN /usr/local/bin/install-plugins.sh \
-  windows-slaves \
-  matrix-auth \
-  matrix-project \
-  antisamy-markup-formatter \
-  script-security \
-  pipeline-model-declarative-agent \
-  pipeline-stage-step \
-  pipeline-input-step \
-  slack \
-  git \
-  blueocean
-
-COPY ref /usr/share/jenkins/ref
+COPY ./plugins.txt /usr/share/jenkins/plugins.txt
+RUN jenkins-plugin-cli --plugins -f /usr/share/jenkins/plugins.txt
 
 USER jenkins
 ENV JENKINS_USER admin

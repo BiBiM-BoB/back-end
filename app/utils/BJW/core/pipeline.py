@@ -26,8 +26,9 @@ def delete_pipeline(jenkins: Jenkins, pipeline_name):
     return True
 
 
-def modify_pipeline(jenkins: Jenkins, pipeline_name, workspace_path, tool_list, branch):
-    # TODO
+def modify_pipeline(jenkins: Jenkins, pipeline_name, git_path, tool_json, branch, build_token):
+    delete_pipeline(jenkins, pipeline_name)
+    create_pipeline(jenkins, pipeline_name, git_path, tool_json, branch, build_token)
     return True
 
 

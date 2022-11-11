@@ -1,4 +1,5 @@
 # FORKED FROM PARAMIKO PROJECT
+# for bibim interactive shell
 
 # Copyright (C) 2003-2007  Robey Pointer <robeypointer@gmail.com>
 #
