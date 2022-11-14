@@ -1,6 +1,6 @@
 import os
 from git import Repo
-from ..utils.GitManager import push
+from ...utils.GitManager import push
 from dotenv import load_dotenv
 
 load_dotenv()
