@@ -1,4 +1,4 @@
-from .utils.localgit import create_git, commit_all, clone_or_pull, push
+from .utils.GitManager import create_git, commit_all, clone_or_pull, push
 import os
 import shutil
 # TODO: dockerfile build init 기능 추가해야 함
