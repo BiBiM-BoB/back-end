@@ -7,6 +7,9 @@ export type SecurityResultDocument = SecurityResult & Document;
 export class SecurityResult {
 
   @Prop()
+  pipelineName: string;
+
+  @Prop()
   stage: string;
 
   @Prop()
