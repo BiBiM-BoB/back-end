@@ -54,7 +54,7 @@ test.runPipeline(pipeline_name)
 
 test.modifyPipeline(미완)
 
-pipeline_list = test.getPipelines()
+pipeline_list = test.getPipelines() #TODO: 다가져오기
 # practice of PipelineInterface.getPipelines()
 for pipeline in pipeline_list:
     test.deletePipeline(pipeline)

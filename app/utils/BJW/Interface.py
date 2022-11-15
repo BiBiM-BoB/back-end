@@ -8,7 +8,7 @@ from api4jenkins import Jenkins
 from jenkinsapi.utils.crumb_requester import CrumbRequester
 import jenkinsapi.jenkins
 
-from .core.init import auto_init
+from .core.utils.init import auto_init
 
 
 def sendStream(stream, string):
