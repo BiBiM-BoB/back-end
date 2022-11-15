@@ -1,5 +1,6 @@
 from flask import request
 from dotenv import load_dotenv
+import os
 
 from ..models.jenkins_has_tool import JenkinsHasTool
 from ..models.jenkins import Jenkins
@@ -7,7 +8,7 @@ from ..models.tool import Tool, tools_schema
 
 from ..utils.db import db_apply
 from ..utils.response import resp
-from ..utils.jenkins_util.custom_jenkins import *
+# from ..utils.jenkins_util.custom_jenkins import *
 from ..utils.login import *
 
 load_dotenv()
@@ -26,7 +27,7 @@ class JenkinsService:
             tools = { 'sis': True, 'ZAP': True, "tt": False }
             # owner_id = who()
             owner_id = 1
-
+            
             select_toollist = list()
             
             for i in tools:

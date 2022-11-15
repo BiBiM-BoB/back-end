@@ -20,15 +20,20 @@ class SecurityResultService:
             return resp(500, "failed")
         
     def project_total_aggregate(id):
-        query = [
-            { "$match" : { "_id" : id  } },
-            { "$unwind" : "$data" },
-            { "$group" : { "_id" : "$data.properties.precision", "count" : { "$sum" : 1 } }}
-        ]
-        result = collection.aggregate(query)
         
-        import pprint
-        pprint.pprint(list(result))
+        # 특정 objectid 값에 대하여, very-high, high등의 count를 계산하는 쿼리
+        query = [
+            { "$match" : { "_id" : ObjectId(id)  } },
+            { "$unwind" : "$data" },
+            { "$group" : { "_id" : "$data.description.properties.precision", "count" : { "$sum" : 1 } }}
+        ]
+        
+        try:
+            result = collection.aggregate(query)
+        except Exception as e:
+            print(e)
+        
+        return resp(200, "check", result)
         
 
     def all_list():

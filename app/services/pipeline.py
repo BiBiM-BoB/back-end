@@ -1,4 +1,4 @@
-from flask import request
+from flask import request, current_app
 from sqlalchemy import and_, or_
 from datetime import datetime
 from dotenv import load_dotenv
@@ -44,39 +44,40 @@ class PipelineService:
         try:
             params = PipelineSerialize(request.get_json())
         except Exception as e:
+            current_app.logger.debug(e)
             return resp(500, "create pipeline failed")
 
-            if params.check() == False:
-                return resp(400, "check your values")
-                
+        if params.check() == False:
+            return resp(400, "check your values")
             
-            # jenkins파일이 가지고 있는 tool 목록들 가져오기
-            # if ( tools = JenKinsHasToolQuery):
-            #     resp(500)
-            tools = JenkinsHasTool.query\
-                .join(Tool, JenkinsHasTool.tool_id == Tool.id)\
-                .add_columns(Tool.name, Tool.stage)\
-                .filter(and_(JenkinsHasTool.jenkins_id == params['jenkins_id'], JenkinsHasTool.deleteAt == None))\
-                .all()
+        
+        # jenkins파일이 가지고 있는 tool 목록들 가져오기
+        # if ( tools = JenKinsHasToolQuery):
+        #     resp(500)
+        tools = JenkinsHasTool.query\
+            .join(Tool, JenkinsHasTool.tool_id == Tool.id)\
+            .add_columns(Tool.name, Tool.stage)\
+            .filter(and_(JenkinsHasTool.jenkins_id == params['jenkins_id'], JenkinsHasTool.deleteAt == None))\
+            .all()
 
 
-            tools_dict = {}
-            for tool in tools:
-                if tool.stage in tools_dict.keys():
-                    tools_dict[tool.stage][tool.name] = 1
-                else:
-                    row = { f"{tool.name}": 1 }
-                    tools_dict[tool.stage] = row
+        tools_dict = {}
+        for tool in tools:
+            if tool.stage in tools_dict.keys():
+                tools_dict[tool.stage][tool.name] = 1
+            else:
+                row = { f"{tool.name}": 1 }
+                tools_dict[tool.stage] = row
 
-            tools_dict = json.dumps(tools_dict)
+        tools_dict = json.dumps(tools_dict)
 
-            # 파이프라인 생성
-            pipeline = PipelineInterface(JENKINS_URL, JENKINS_ID, JENKINS_PW)
+        # 파이프라인 생성
+        pipeline = PipelineInterface(JENKINS_URL, JENKINS_ID, JENKINS_PW)
 
-            # 한승이가 만드는 jenkins 모듈이 성공 여부 등의 결과를 넘겨주도록 수정
-            result = pipeline.createPipeline(params['pipeline_name'], params['repo_url'], tools_dict, f"*/{params['branch']}", params["jenkins_token"])
+        # 한승이가 만드는 jenkins 모듈이 성공 여부 등의 결과를 넘겨주도록 수정
+        result = pipeline.createPipeline(params['pipeline_name'], params['repo_url'], tools_dict, f"*/{params['branch']}", params["jenkins_token"])
 
-            return resp(201, "create pipeline success")
+        return resp(201, "create pipeline success")
 
     # 파이프라인 리스트 return (한승이 모듈 사용하기)
     # def pipeline_list():

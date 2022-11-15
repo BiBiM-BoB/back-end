@@ -62,6 +62,6 @@ def create_app():
     app.register_blueprint(user.bp)
     app.register_blueprint(pipeline.bp)
     app.register_blueprint(security_result.bp)
-    app.register_blueprint(jenkins.bp)
+    # app.register_blueprint(jenkins.bp)
     app.register_blueprint(tool.bp)
     return app
