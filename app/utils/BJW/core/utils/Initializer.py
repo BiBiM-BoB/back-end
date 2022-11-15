@@ -50,19 +50,24 @@ Purpose: 이 파이썬 파일은 최신 Security tools git으로부터 jenkins�
 
 '''
 
-
-from ...utils.GitManager import GitManager
 import os
 import pathlib
 import shutil
+import platform
+
+from ...utils.Git_manager import GitManager
 # TODO: setup에 git clone 포함
 
 class Initializer:
 
     user = os.getlogin()
-    root = pathlib.Path(f'/home/ubuntu/{user}')
 
-    sec_git = GitManager(str(root/'sectools-completed'), r"http://github.com/")
+    if platform.system() is 'Linux':
+        root = pathlib.Path(f'/home/{user}/bibim')
+    else:
+        root = pathlib.Path(f'C:\\Program Files\\bibim')
+    
+    sec_git = GitManager(str(root/'sectools-completed'), r"http://github.com/") # TODO: sec-git init
     
     def __init__(self, jenkins_url):
         print("[+] Initializing...")

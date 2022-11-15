@@ -1,70 +1,40 @@
-from api4jenkins import Jenkins
+from .jenkins import Jenkins
+from .utils import Initializer
 from .generators.JenkinsfileGenerator import JenkinsfileGenerator
 from .generators.XMLGenerator import XMLGenerator
-import time
 
 
-def create_pipeline(jenkins: Jenkins, pipeline_name, git_path, tool_json, branch, build_token):
-    remotegitdir, jenkinsfile = JenkinsfileGenerator(pipeline_name, tool_json).post_action()
-    xml = XMLGenerator(pipeline_name,
-                       ("remote", git_path),
-                       ("url", remotegitdir),
-                       ("remoteJenkinsFile", jenkinsfile),
-                       ("name", branch),
-                       # ("authToken", build_token)
-                       ).post_action()
-    
-    job_instance = jenkins.create_job(pipeline_name, xml)
+class Pipeline:
+    def __init__(self, jenkins_url, jenkins_username, jenkins_token, pipeline_name,):
+        self.initializer = Initializer()
+        self.jenkins = Jenkins(jenkins_url, jenkins_username, jenkins_token)
+        self.pipeline_name = pipeline_name
 
-    return "createPipeline Succeed!"
+    def create_pipeline(self, tool_json, target, target_branch, build_token=None, *args):
+        # 1. create Jenkinsfile according to tool_json
+        JG = JenkinsfileGenerator(self.initializer.jenkins_git.local, self.initializer.jenkins_git.remote, self.pipeline_name)
+        jenkinsfile = JG.generate(tool_json)
 
+        # 2. create config.xml
+        XG = XMLGenerator(self.initializer.jenkins_git.local, self.initializer.jenkins_git.remote, self.pipeline_name)
+        xml = XG.generate(target, target_branch, jenkinsfile)
 
-def delete_pipeline(jenkins: Jenkins, pipeline_name):
-    job_instance = jenkins.delete_job(pipeline_name)
-    if jenkins.get_job(pipeline_name):
-        return False
-    return True
+        # 3. create pipeline with that two files
+        job = self.jenkins.create_job(self.pipeline_name, xml)
+        
 
+    def run_pipeline(self):
+        # not sure if this function requires crumb
+        job = self.jenkins.build_job(self.pipeline_name)
 
-def modify_pipeline(jenkins: Jenkins, pipeline_name, git_path, tool_json, branch, build_token):
-    delete_pipeline(jenkins, pipeline_name)
-    create_pipeline(jenkins, pipeline_name, git_path, tool_json, branch, build_token)
-    return True
+    def delete_pipeline(self):
+        job = self.jenkins.delete_job(self.pipeline_name)
 
+    def get_pipeline(self):
+        pass
 
-def run_pipeline(jenkins: Jenkins, pipeline_name, *args):
-    # *args here is build parameters
-    job_instance = jenkins.build_job(pipeline_name)
-    while not job_instance.get_build():
-        time.sleep(1)
-    print(f"[+] Build {pipeline_name} started!")
-
-    # return job_instance.get_build()
-
-def get_pipeline(jenkins: Jenkins, *args):
-    pipeline_list = []
-    for job in jenkins.iter_jobs():
-        pipeline_list.append(job.full_name)
-    return pipeline_list
-
-if __name__ == "__main__":
-    import json
-
-    json_obj = {
-        'DAST': {
-            'ZAP': 1
-        },
-        'SAST': {
-            'CodeQL': 1
-        },
-        'SCA': {
-            'DependencyCheck': 0
-        },
-        'SIS': {
-            'GGShield': 0,
-            'GitLeaks': 0
-        }
-    }
-    json_obj = json.dumps(json_obj)
-    jenkins = Jenkins("http://localhost:8080", auth=('test', 'test'))
-    create_pipeline(jenkins, 'test_pipe_name', "https://github.com/digininja/DVWA", json_obj, "*/master", 'tokensample')
+    def get_pipelines(self) -> list:
+        pipeline_list = []
+        for job in self.jenkins.iter_jobs():
+            pipeline_list.append(job.full_name)
+        return pipeline_list

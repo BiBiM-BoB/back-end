@@ -1,6 +1,3 @@
-"""
-Back-end nodejs/nestjs와의 통신을 위한 interface 입니다.
-"""
 import sys
 
 from .core import pipeline
@@ -8,33 +5,7 @@ from api4jenkins import Jenkins
 from jenkinsapi.utils.crumb_requester import CrumbRequester
 import jenkinsapi.jenkins
 
-from .core.utils.init import auto_init
-
-
-def sendStream(stream, string):
-    print(string)
-    if stream == "stderr":
-        sys.stderr.flush()
-    elif stream == "stdout":
-        sys.stdout.flush()
-
-
-def getJenkinsInstance(url, username, password):
-    server = Jenkins(url, auth=(username, password))
-    print("[+] Successfully connencted to Jenkins Server!")
-    return server
-
-class JenkinsInterface:
-    def __init__(self, url, username, password):
-        self.jenkins = getJenkinsInstance(url, username, password)
-
-    def generateApiToken(self):
-        try:
-            result = self.jenkins.generate_new_api_token()
-            sendStream("stdout", result)
-        except:
-            sendStream("stdout", "ERROR")
-
+from .core.utils.Initializer import auto_init
 
 
 class PipelineInterface:

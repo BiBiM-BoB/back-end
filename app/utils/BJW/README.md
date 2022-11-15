@@ -1,5 +1,5 @@
 # BJW
-BJW는 Bibim Jenkins Wrapper의 약자로, python을 통하여 간편하게 jenkins를 다룰 수 있도록 해주는 Bibim의 custom python module입니다.
+BJW는 Bibim Jenkins Wrapper의 약자로, 어디서든 python을 통하여 간편하게 jenkins를 다룰 수 있도록 해주는 Bibim의 custom python module입니다.
 
 ### 예시 코드(복붙용)
 ```python

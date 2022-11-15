@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from .Manager.AWS_manager import AWSManager
-from .Manager.SSH_manager import SSHManager
+from ...utils.AWS_manager import AWSManager
+from ...utils.SSH_manager import SSHManager
 
 def SetupEC2(name):
     aws = AWSManager()
