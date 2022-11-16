@@ -17,9 +17,12 @@ There are two public fuctions in class JenkinsfileGenerator(),
 '''
 
 import os
+import sys
 import json
 
-from ...utils.Git_manager import GitManager
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))))
+
+from utils.Git_manager import GitManager
 
 class JenkinsfileGenerator(GitManager):
     def __init__(self, local, remote, pipeline_name):
@@ -27,8 +30,13 @@ class JenkinsfileGenerator(GitManager):
         super().__init__(local, remote)
 
         self.pipeline_name = pipeline_name
-        self.jenkinsfile_path = "Jenkinsfiles/{pipeline_name}"
-    
+        self.jenkinsfile_path = f"Jenkinsfiles/{pipeline_name}"
+
+        try:
+            os.makedirs(str(self.localPath/'Jenkinsfiles'))
+        except FileExistsError:
+            print("[+] Jenkinsfile dir exists.")
+            
     def generate_by_json(self, tools_json):
         # json -> list
         self.tool_list = self._json_to_list(tools_json)
@@ -55,7 +63,7 @@ class JenkinsfileGenerator(GitManager):
 
     def _generate(self, groovy: str):
         local_jenkinsfile = str(self.localPath / self.jenkinsfile_path)
-        with open(local_jenkinsfile) as f:
+        with open(local_jenkinsfile, 'w') as f:
             f.write(groovy)
     
     

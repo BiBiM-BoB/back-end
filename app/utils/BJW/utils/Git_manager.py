@@ -42,8 +42,8 @@ class GitManager:
         except GitCommandError: # if already cloned, pull
             flag = self.pull()
         
-        if flag is FetchInfo.HEAD_UPTODATE: # if git is up-to-date
-            return False
+            if flag is FetchInfo.HEAD_UPTODATE: # if git is up-to-date
+                return False
         
         return True
     

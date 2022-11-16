@@ -1,7 +1,10 @@
 from pathlib import Path
+import sys, os
 
-from ...utils.AWS_manager import AWSManager
-from ...utils.SSH_manager import SSHManager
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))))
+
+from utils.AWS_manager import AWSManager
+from utils.SSH_manager import SSHManager
 
 def SetupEC2(name):
     aws = AWSManager()
@@ -34,13 +37,10 @@ class SetupSSH:
         # 4. Run setup shell codes
         self._setup()
 
-        # 5. Build jenkins
-        self._build()
-
-        # 6. Run jenkins
+        # 5. Run jenkins
         self._run_jenkins()
 
-        # 7. Return instance informations
+        # 6. Return instance informations
         self._post_action()
     
     def _connect_SSH(self):
@@ -59,11 +59,6 @@ class SetupSSH:
         self.instance.execute_channel('chmod +x setup.sh', False)
         self.instance.execute_channel(r"sed -i 's/\r$//' setup.sh")
         self.instance.execute_channel('./setup.sh')
-
-    def _build(self):
-        print("[+] Building Jenkins docker..")
-        self.instance.execute_channel('sudo docker build -t bibim-jenkins:0.1 .')
-        self.instance.execute_channel('sudo docker volume create jenkins')
     
     def _run_jenkins(self):
         print("[+] Running Jenkins...")

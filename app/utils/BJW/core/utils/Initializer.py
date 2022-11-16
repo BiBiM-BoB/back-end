@@ -51,28 +51,32 @@ Purpose: 이 파이썬 파일은 최신 Security tools git으로부터 jenkins�
 '''
 
 import os
+import sys
 import pathlib
 import shutil
 import platform
+from distutils import dir_util
 
-from ...utils.Git_manager import GitManager
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))))
+
+from utils.Git_manager import GitManager
 # TODO: setup에 git clone 포함
 
 class Initializer:
 
     user = os.getlogin()
 
-    if platform.system() is 'Linux':
+    if platform.system() == 'Linux':
         root = pathlib.PurePosixPath(f'/home/{user}/bibim')
     else:
-        root = pathlib.PureWindowsPath(f'C:\\Program Files\\bibim')
+        root = pathlib.PureWindowsPath(os.path.expanduser('~\\Documents\\bibim'))
     
-    sec_git = GitManager(str(root/'sectools-completed'), r"http://github.com/") # TODO: sec-git init
+    sec_git = GitManager(str(root/'sectools-completed'), r"https://github.com/BiBiM-BoB/sectools-completed") # TODO: sec-git init
     
     def __init__(self, jenkins_url):
         print("[+] Initializing...")
 
-        if jenkins_url[-1] is r'/':
+        if jenkins_url[-1] == r'/':
             self.jenkins_url = jenkins_url + 'userContent.git'
         else:
             self.jenkins_url = jenkins_url + r'/userContent.git'
@@ -85,13 +89,16 @@ class Initializer:
         updated = self._setup_git()
 
         # if sec-git is updated, copy sec-git into jenkins-git, and push
-        if updated:
-            self._update_jenkins_git()
+        # if updated:
+        self._update_jenkins_git()
         
         print("[+] Finished Initializing!")
 
     def _setup_dir(self):
-        os.makedirs(self.root)
+        try:
+            os.makedirs(self.root)
+        except FileExistsError:
+            print(f"[+] {self.root} already exists!")
     
     def _setup_git(self) -> bool:
         self.jenkins_git.clone_or_pull()
@@ -100,10 +107,21 @@ class Initializer:
         return flag
     
     def _update_jenkins_git(self):
-        os.removedirs(self.jenkins_git.localPath/'jenkins')
-        os.removedirs(self.jenkins_git.localPath/'components')
-        shutil.copyfile(self.sec_git.localPath/'jenkins', self.jenkins_git.localPath/'jenkins')
-        shutil.copyfile(self.sec_git.localPath/'components', self.jenkins_git.localPath/'components')
+        try:
+            shutil.rmtree(self.jenkins_git.localPath/'jenkins')
+            os.makedirs(self.jenkins_git.localPath/'jenkins')
+        except FileNotFoundError:
+            pass
+
+        try:
+            shutil.rmtree(self.jenkins_git.localPath/'components')
+            os.makedirs(self.jenkins_git.localPath/'components')
+        except FileNotFoundError:
+            pass
+
+        dir_util.copy_tree(str(self.sec_git.localPath/'jenkins'/'groovy'), str(self.jenkins_git.localPath/'groovy'))
+        dir_util.copy_tree(str(self.sec_git.localPath/'jenkins'/'xmls'), str(self.jenkins_git.localPath/'xmls'))
+        dir_util.copy_tree(str(self.sec_git.localPath/'components'), str(self.jenkins_git.localPath/'components'))
 
         self.jenkins_git.commit_and_push('updated git')
 

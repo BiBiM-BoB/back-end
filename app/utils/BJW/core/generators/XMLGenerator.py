@@ -10,8 +10,12 @@
 
 import xml.etree.ElementTree as ET
 import shutil
+import sys
+import os
 
-from ...utils.Git_manager import GitManager
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))))
+
+from utils.Git_manager import GitManager
 
 class XMLGenerator(GitManager):
     def __init__(self, local, remote, pipeline_name, base_xml='config.xml'):
@@ -23,14 +27,19 @@ class XMLGenerator(GitManager):
 
         xml_path = f"xmls/{pipeline_name}"
         self.xml_path = str(self.localPath/xml_path)
-    
+
+        try:
+            os.makedirs(str(self.localPath/'xmls'))
+        except FileExistsError:
+            print("[+] xmls dir exists.")
+
     def generate(self, target, target_branch, jenkinsfile_path, *args):
-        element_list = list(
+        element_list = [
             ('remote', target), 
             ('name', target_branch),
             ('remoteJenkinsFile', jenkinsfile_path),
             ('url', self.remote)
-        )
+        ]
 
         self.target_xml = self._copyXML()
         self.root = self.target_xml.getroot()
