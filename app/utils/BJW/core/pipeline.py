@@ -13,7 +13,7 @@ class Pipeline:
     def create_pipeline(self, tool_json, target, target_branch, build_token=None, *args):
         # 1. create Jenkinsfile according to tool_json
         JG = JenkinsfileGenerator(self.initializer.jenkins_git.local, self.initializer.jenkins_git.remote, self.pipeline_name)
-        jenkinsfile = JG.generate(tool_json)
+        jenkinsfile = JG.generate_by_json(tool_json)
 
         # 2. create config.xml
         XG = XMLGenerator(self.initializer.jenkins_git.local, self.initializer.jenkins_git.remote, self.pipeline_name)

@@ -63,9 +63,9 @@ class Initializer:
     user = os.getlogin()
 
     if platform.system() is 'Linux':
-        root = pathlib.Path(f'/home/{user}/bibim')
+        root = pathlib.PurePosixPath(f'/home/{user}/bibim')
     else:
-        root = pathlib.Path(f'C:\\Program Files\\bibim')
+        root = pathlib.PureWindowsPath(f'C:\\Program Files\\bibim')
     
     sec_git = GitManager(str(root/'sectools-completed'), r"http://github.com/") # TODO: sec-git init
     
