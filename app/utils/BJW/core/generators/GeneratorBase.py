@@ -1,6 +1,6 @@
 import os
 from git import Repo
-from ...utils.GitManager import push
+# from ...utils.GitManager import push
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -27,7 +27,7 @@ class GeneratorBase:
 
     def _commit(self, message):
         commit_all(self.localgitdir, message)
-        push(self.localgitdir)
+        # push(self.localgitdir)
 
 
     def post_action(self):

@@ -8,7 +8,7 @@ from api4jenkins import Jenkins
 from jenkinsapi.utils.crumb_requester import CrumbRequester
 import jenkinsapi.jenkins
 
-from .core.utils.init import auto_init
+# from .core.utils.init import auto_init
 
 
 def sendStream(stream, string):
@@ -39,7 +39,7 @@ class JenkinsInterface:
 
 class PipelineInterface:
     def __init__(self, url, username, password):
-        auto_init(url)
+        # auto_init(url)
         self.url = url
         self.username = username
         self.password = password
