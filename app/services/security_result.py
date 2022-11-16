@@ -19,8 +19,7 @@ class SecurityResultService:
             current_app.logger.debug(e)
             return resp(500, "failed")
         
-    def project_total_aggregate(id):
-        
+    def project_id_total_aggregate(id):
         # 특정 objectid 값에 대하여, very-high, high등의 count를 계산하는 쿼리
         query = [
             { "$match" : { "_id" : ObjectId(id)  } },
@@ -31,11 +30,47 @@ class SecurityResultService:
         try:
             result = collection.aggregate(query)
         except Exception as e:
-            print(e)
+            current_app.logger.debug("project_id collection aggregate error")
+            current_app.logger.debug(e)
+            return resp(500, "failed")
         
-        return resp(200, "check", result)
+        return resp(200, "success", list(result))
+    
+    def all_pipeline_total_aggregate():
+        query = [
+            { "$unwind" : "$data" },
+            { "$group" : { "_id" : "$data.description.properties.precision", "count" : { "$sum" : 1 } }}
+        ]
         
-
+        try:
+            result = collection.aggregate(query)
+        except Exception as e:
+            current_app.logger.debug("all_pipeline collection aggregate error")
+            current_app.logger.debug(e)
+            return resp(500, "failed")
+        
+        return resp(200, "success", list(result))
+    
+    def pipeline_name_total_aggregate(name):
+        query = [
+            { "$match" : { "pipelineName" : name  } },
+            { "$unwind" : "$data" },
+            { "$group" : { "_id" : "$data.description.properties.precision", "count" : { "$sum" : 1 } }}
+        ]
+        
+        try:
+            result = collection.aggregate(query)
+        except Exception as e:
+            current_app.logger.debug("pipeline_name collection aggregate error")
+            current_app.logger.debug(e)
+            return resp(500, "failed")
+        
+        return resp(200, "success", list(result))
+        
+    def stage_total_aggregate():
+        
+        return resp(200, "success", list())
+        
     def all_list():
         try:
             result = collection.find()
