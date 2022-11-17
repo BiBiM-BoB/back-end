@@ -5,16 +5,35 @@ from .jenkins import Jenkins
 from .utils.Initializer import Initializer
 from .generators.JenkinsfileGenerator import JenkinsfileGenerator
 from .generators.XMLGenerator import XMLGenerator
+from .utils.Debug_Initializer import DebugInitializer
 
 
 class Pipeline:
-    def __init__(self, jenkins_url, jenkins_username, jenkins_token, pipeline_name):
+    def __init__(self, jenkins_url, jenkins_username, jenkins_token, pipeline_name, mode=None, **kwargs):
         self.pipeline_name = pipeline_name
         self.url = jenkins_url
         self.username = jenkins_username
         self.token = jenkins_token
 
-        self.initializer = Initializer(jenkins_url)
+        if not mode:
+            self.initializer = Initializer(jenkins_url)
+        if mode == 'DEBUG':
+            self.initializer = DebugInitializer(jenkins_url)
+            self.initializer.debug_mode(
+                kwargs['input_dockerfile'],
+                kwargs['input_script_dir']
+            )
+        if mode == 'PUSH':
+            self.initializer = DebugInitializer(jenkins_url)
+            self.initializer.push_mode(
+                kwargs['code'],
+                kwargs['groovy_name'],
+                kwargs['input_dockerfile'],
+                kwargs['input_script_dir'],
+                kwargs['stage'],
+                kwargs['tool_name']
+            )
+
         self.jenkins = Jenkins(jenkins_url, jenkins_username, jenkins_token)
 
     def create_pipeline(self, tool_json, target, target_branch, build_token=None, *args):

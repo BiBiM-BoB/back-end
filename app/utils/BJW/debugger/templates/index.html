@@ -49,6 +49,7 @@ def exec(container_name, command) {
 }
 
 node {
+    jenkins_dir = '/var/jenkins_home/userContent'
     stage('Run NodeJS Docker') {
         def nodejs_img = docker.image('node:lts-alpine')
         
@@ -78,7 +79,7 @@ node {
                                         theme: 'mbo'
                                     });
                                     
-                                    function check_submit(e) {
+                                    function check_debug(e) {
                                         let t = new FormData(document.getElementById('debugForm'))
                                         const code = editor.doc.getValue();
                                         t.append('code', code);
@@ -92,6 +93,21 @@ node {
                                                 }
                                         })
                                     };
+
+                                    function check_push(e) {
+                                        let t = new FormData(document.getElementById('debugForm'))
+                                        const code = editor.doc.getValue();
+                                        t.append('code', code);
+
+                                        fetch('/push', {
+                                            method: 'POST',
+                                            body: t
+                                        }).then(response => {
+                                                if (response.redirected) {
+                                                    window.location.href = response.url;
+                                                }
+                                        })
+                                    }
                                 </script>
                             </div>
                         </div>
@@ -111,13 +127,18 @@ node {
                                     <br>
                                     <div class="input-group form-group">
                                         <input name="target" class="form-control" placeholder="Target Git (github repo dir)">
-                                        <br>
+                                    </div>
+                                    <br>
+                                    <div class="input-group form-group">
                                         <input name="target_branch" class="form-control" placeholder="Target branch">
                                     </div>
                                     <br>
                                     <div class="input-group form-group">
                                         <label class="btn btn-primary btn-file">
-                                            Upload Folder <input type="file" style="display: none;">
+                                            Dockerfile <input type="file" name="input_dockerfile" style="display: none;">
+                                        </label>
+                                        <label class="btn btn-primary btn-file">
+                                            Script Folder <input type="file" name="input_script_dir" style="display: none;" webkitdirectory directory multiple/>
                                         </label>
                                     </div>
                                 </div>
@@ -144,10 +165,33 @@ node {
                     </div>
                     <br>
                     <div class="d-grid gap-2">
-                        <button class="btn btn-primary" type="button" onclick="check_submit()">Debug!</button>
+                        <button class="btn btn-primary" type="button" onclick="check_debug()">Debug!</button>
                     </div>
+                    <br>
 
-                </div>
+                    <div class="card">
+                        <div class="card-header py-2">
+                            <h5 class="mb-0">Tool Information for Git</h5>
+                        </div>
+                        <div class="card-body">
+
+                            <div name="push" class="form-group">
+                                <div class="input-group form-group">
+                                    <input name="groovy_name" class="form-control" placeholder="Groovy name: num.name.groovy">
+                                </div>
+                                <br>
+                                <div class="input-group form-group">
+                                    <input name="stage" class="form-control" placeholder="Stage [ex: DAST]">
+                                    <input name="tool_name" class="form-control" placeholder="tool name">
+                                </div>
+                            </div>
+                        </div>
+                        <br>
+                    </div>
+                    <br>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-primary" type="button" onclick="check_push()">Git Push!</button>
+                    </div>
             </div>
         </div>
     </div>

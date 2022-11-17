@@ -72,10 +72,10 @@ class XMLGenerator(GitManager):
         for target in it:
             original = target.text
             # '$bibim'
-            modified = original.replace(original, value)
+            modified = original.replace('$bibim', value)
             target.text = modified
         self.target_xml.write(self.xml_path, method='html', encoding='utf-8', xml_declaration=True)
 
     def _replace_contents(self, *args):
-        for item in args:
+        for item in args[0]:
             self._replace_content(item[0], item[1])

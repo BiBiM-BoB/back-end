@@ -60,6 +60,9 @@ from distutils import dir_util
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))))
 
 from utils.Git_manager import GitManager
+
+if __name__ == '__main__':
+    from ...utils.Git_manager import GitManager
 # TODO: setup에 git clone 포함
 
 class Initializer:
