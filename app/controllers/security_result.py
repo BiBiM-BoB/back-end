@@ -15,4 +15,12 @@ def security_result_list():
 
 @bp.route("/projectTotalSecurityResult/<id>", methods=["GET"])
 def project_total_security_result(id):
-    return SecurityResultService.project_total_aggregate(id)
+    return SecurityResultService.project_id_total_aggregate(id)
+
+@bp.route("/allPipelineTotalSecurityResult", methods=['GET'])
+def all_pipeline_total_security_result():
+    return SecurityResultService.all_pipeline_total_aggregate()
+
+@bp.route("/pipelineNameTotalSecurityResult/<name>", methods=['GET'])
+def pipline_name_total_security_result(name):
+    return SecurityResultService.pipeline_name_total_aggregate(name)
