@@ -8,7 +8,7 @@ from .generators.XMLGenerator import XMLGenerator
 
 
 class Pipeline:
-    def __init__(self, jenkins_url, jenkins_username, jenkins_token, pipeline_name,):
+    def __init__(self, jenkins_url, jenkins_username, jenkins_token, pipeline_name):
         self.pipeline_name = pipeline_name
         self.url = jenkins_url
         self.username = jenkins_username
