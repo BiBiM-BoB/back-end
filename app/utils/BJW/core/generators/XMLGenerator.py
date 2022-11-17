@@ -1,52 +1,81 @@
+'''OneDayGinger
+
+    XMLGenerator().generate()
+        (1) read and copy base xml
+        (2) modify base xml by ElementTree
+        (3) save new xml into local jenkins-git
+        (4) git push
+
+'''
+
 import xml.etree.ElementTree as ET
 import shutil
-# 이 파일 자체를 실행시키면서 디버깅할때는 from GeneratorBase ~ 가 되어야 함.
-from .GeneratorBase import GeneratorBase
+import sys
+import os
 
-class XMLGenerator(GeneratorBase):
-    def __init__(self, pipeline_name, *args: tuple):
-        self.xml_path = self.localgitdir + "xmls/" + pipeline_name + ".xml"
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))))
 
-        self.target_xml = self.copyXML()
+from utils.Git_manager import GitManager
+
+class XMLGenerator(GitManager):
+    def __init__(self, local, remote, pipeline_name, base_xml='config.xml'):
+        super().__init__(local, remote)
+        self.pipeline_name = pipeline_name
+
+        base_xml = f"xmls/{base_xml}"
+        self.base_xml = str(self.localPath/base_xml)
+
+        xml_path = f"xmls/{pipeline_name}"
+        self.xml_path = str(self.localPath/xml_path)
+
+        try:
+            os.makedirs(str(self.localPath/'xmls'))
+        except FileExistsError:
+            print("[+] xmls dir exists.")
+
+    def generate(self, target, target_branch, jenkinsfile_path, *args):
+        element_list = [
+            ('remote', target), 
+            ('name', target_branch),
+            ('remoteJenkinsFile', jenkinsfile_path),
+            ('url', self.remote)
+        ]
+
+        self.target_xml = self._copyXML()
         self.root = self.target_xml.getroot()
 
-        self.replace_contents(*args)
-        self.finishXML()
+        self._replace_contents(element_list)
+        if args:
+            self._replace_contents(*args)
+        
+        self._finishXML()
+        self.commit_and_push(f'Generated xml "{self.pipeline_name} in {self.xml_path}.')
 
-        self._commit(f"Generated {pipeline_name}.xml")
+        with open(self.xml_path, 'r') as f:
+            xml = f.read()
 
-    def copyXML(self):
-        shutil.copyfile(self.localgitdir + "xmls/config.xml", self.xml_path)
+        return xml
+
+    def _copyXML(self):
+        shutil.copyfile(self.base_xml, self.xml_path)
         return ET.parse(open(self.xml_path, 'r', encoding='utf-8'))
 
-    def finishXML(self):
+    def _finishXML(self):
         with open(self.xml_path, 'rt', encoding='UTF-8') as file:
             x = file.read()
         with open(self.xml_path, 'wt', encoding='UTF-8') as file:
             x = "<?xml version='1.0' encoding='utf-8'?>\n" + x
             file.write(x)
 
-    def replace_content(self, target_tag, value):
+    def _replace_content(self, target_tag, value):
         it = self.root.iter(target_tag)
         for target in it:
             original = target.text
-            modified = original.replace("$bibim", value)
-
+            # '$bibim'
+            modified = original.replace(original, value)
             target.text = modified
         self.target_xml.write(self.xml_path, method='html', encoding='utf-8', xml_declaration=True)
 
-    def replace_contents(self, *args):
+    def _replace_contents(self, *args):
         for item in args:
-            self.replace_content(item[0], item[1])
-
-    def post_action(self):
-        xml = open(self.xml_path, 'r').read()
-        return xml
-
-if __name__ == "__main__":
-    test = XMLGenerator('test_pipe_name',
-                       ("remote", "https://github.com/digininja/DVWA"),
-                       ("url", "/home/ubuntu/bibim/JJJJJ"),
-                       ("remoteJenkinsFile", "path_inside_git"),
-                       ("name", "*/master")).post_action()
-    print("DEBUGGING..")
+            self._replace_content(item[0], item[1])

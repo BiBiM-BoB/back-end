@@ -1,22 +1,82 @@
+'''OneDayGinger
+
+There are two public fuctions in class JenkinsfileGenerator(),
+
+    [i] generate_by_json()
+        (1) tools json -> tools list
+        (2) for tool in tools : 
+                find groovy(tool)
+        (3) concat groovy codes
+        (4) generate(groovy)
+        (5) git commit & push
+
+    [ii] generate_by_raw_groovy()
+        (1) generate(groovy)
+        (2) git commit & push
+
+'''
+
 import os
+import sys
 import json
-from .GeneratorBase import GeneratorBase
-'''
-    1. Creates Jenkinsfile
-    2. Commit to local git
-    3. Push to origin
-'''
 
-class JenkinsfileGenerator(GeneratorBase):
-    def __init__(self, pipeline_name, input_json):
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))))
+
+from utils.Git_manager import GitManager
+
+class JenkinsfileGenerator(GitManager):
+    def __init__(self, local, remote, pipeline_name):
+        # set basic jenkins-git property
+        super().__init__(local, remote)
+
         self.pipeline_name = pipeline_name
-        self.input_json = json.dumps(input_json)
-        self.jenkinsfile_path = self.localgitdir + "Jenkinsfiles/" + pipeline_name
+        self.jenkinsfile_path = f"Jenkinsfiles/{pipeline_name}"
 
-        self.tool_list = self._json_to_list(self.input_json)
+        try:
+            os.makedirs(str(self.localPath/'Jenkinsfiles'))
+        except FileExistsError:
+            print("[+] Jenkinsfile dir exists.")
+            
+    def generate_by_json(self, tools_json):
+        # json -> list
+        self.tool_list = self._json_to_list(tools_json)
 
-        self._generate_jenkinsfile(self.tool_list)
-        self._commit(f"Generated Jenkinsfile {pipeline_name}")
+        # generate groovy script
+        groovy = self._write_stages('FUNC', 'start')
+        for tool in self.tool_list:
+            groovy += self._write_stages(tool)
+        groovy += self._write_stages('FUNC', 'stop')
+
+        # and save it
+        self._generate(groovy)
+
+        # git push generated groovy script into jenkins-git
+        self.commit_and_push(f'Generated Jenkinsfile "{self.pipeline_name} in {self.jenkinsfile_path}.')
+
+        return self.jenkinsfile_path
+
+
+    def generate_by_raw_groovy(self, groovy):
+        self._generate(groovy)
+
+        return self.jenkinsfile_path
+
+    def _generate(self, groovy: str):
+        local_jenkinsfile = str(self.localPath / self.jenkinsfile_path)
+        with open(local_jenkinsfile, 'w') as f:
+            f.write(groovy)
+    
+    
+    def _json_to_list(self, tools_json) -> list:
+        tools_list = []
+        tools_json = json.loads(tools_json)
+
+        for stage in tools_json.keys():
+            for tool in tools_json[stage].keys():
+                if tools_json[stage][tool]:
+                    tools_list.append(stage + '/' + tool)
+
+        return tools_list
 
     def _find_stage(self, stage: str, tool_list):
         ret = []
@@ -24,25 +84,13 @@ class JenkinsfileGenerator(GeneratorBase):
             if stage in tool:
                 ret.append(tool)
         return ret
-    
-    def _json_to_list(self, input_json):
-        tool_list = []
-
-        input_json = json.loads(input_json)
-
-        for stage in input_json.keys():
-            for tool in input_json[stage].keys():
-                if input_json[stage][tool]:
-                    tool_list.append(stage + '/' + tool)
-        print(tool_list)
-        return tool_list
-
+        
     # Let's say,
     # self._write_stages('DAST/ZAP')
     def _write_stages(self, tool, part=None):
         # then this function will return Jenkinsfile components about running ZAP, which is variable 'stages' below.
-        stages = ""
-        component_dir = self.localgitdir + 'components/'
+        groovy = ""
+        component_dir = self.localgitdir + 'components'
         for dirname, _, files in os.walk(component_dir + tool + '/'):
             print(component_dir + tool)
             files.sort()
@@ -64,35 +112,21 @@ class JenkinsfileGenerator(GeneratorBase):
                         files = files[:i]
                         break
 
-            for file in files:
-                file = open(os.path.join(dirname, file), 'r')
-                text = file.read()
+            for f in files:
+                f = open(os.path.join(dirname, f), 'r')
+                text = f.read()
                 
                 if text[:6] == "$bibim":
-                    file.close()
+                    f.close()
                     stage_list = self._find_stage(text.split(':')[1], self.tool_list)
                     # if component's content is '$bibim:SCA:start' : self._find_stage will return all sca tool list
                     # for example,
                     # stage_list = ['SCA/Dependabot', 'SCA/Dependency_check']
                     for stage in stage_list:
                         # if component's content is (for example) '$bibim:BUILD:start' : call this func recursively
-                        stages += self._write_stages(stage, text.split(':')[2])
+                        groovy += self._write_stages(stage, text.split(':')[2])
                 else:
-                    file.close()
-                    stages += text
+                    f.close()
+                    groovy += text
 
-        return stages
-
-    def _generate_jenkinsfile(self, tool_list):
-        jenkinsfile = open(self.jenkinsfile_path, 'w')
-        jenkinsfile.write(self._write_stages('FUNC', 'start'))
-
-        for tool in tool_list:
-            print(tool)
-            jenkinsfile.write(self._write_stages(tool))
-
-        jenkinsfile.write(self._write_stages('FUNC', 'stop'))
-        jenkinsfile.close()
-
-    def post_action(self):
-        return self.remotegitdir, "Jenkinsfiles/" + self.pipeline_name
+        return groovy

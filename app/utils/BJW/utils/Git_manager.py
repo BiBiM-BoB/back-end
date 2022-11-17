@@ -6,9 +6,10 @@ from pathlib import Path
 
 class GitManager:
     def __init__(self, local, remote=None):
-        self.remote = remote
         self.local = local
+        self.remote = remote
         self.localPath = Path(local)
+        self.remotePath = Path(remote)
     
     def clone(self):
         repo = Repo.clone_from(self.remote, self.local)
@@ -41,8 +42,8 @@ class GitManager:
         except GitCommandError: # if already cloned, pull
             flag = self.pull()
         
-        if flag is FetchInfo.HEAD_UPTODATE: # if git is up-to-date
-            return False
+            if flag is FetchInfo.HEAD_UPTODATE: # if git is up-to-date
+                return False
         
         return True
     

@@ -11,7 +11,8 @@ from ..models.tool import Tool
 
 from ..utils.response import resp
 from ..utils.db import db_apply
-from ..utils.BJW.Interface import *
+
+from ..utils.BJW.core.pipeline import *
 
 
 load_dotenv()
@@ -27,7 +28,13 @@ class PipelineSerialize:
         print(f"PipelineSerialize Data: {self.data}")
 
     def check(self):
-        if(not self.data['pipeline_name'] or not self.data['repo_url'] or not self.data['jenkins_id'] or not self.data["jenkins_token"] or not self.data["branch"]):
+        if(not self.data['pipeline_name'] or not self.data['repo_url'] or not self.data["branch"]):
+            return False
+        else:
+            return True
+        
+    def run_param_check(self):
+        if(not self.data['pipeline_name'] or not self.data['repo_url'] or not self.data["branch"]):
             return False
         else:
             return True
@@ -35,15 +42,13 @@ class PipelineSerialize:
     def get_element(self, key):
         return self.data[key]
 
-
-        
-
 class PipelineService:
     # 파이프라인 생성
     def create_pipeline():
         try:
             params = PipelineSerialize(request.get_json())
         except Exception as e:
+            current_app.logger.debug("[create_pipeline] error")
             current_app.logger.debug(e)
             return resp(500, "create pipeline failed")
 
@@ -60,7 +65,6 @@ class PipelineService:
             .filter(and_(JenkinsHasTool.jenkins_id == params['jenkins_id'], JenkinsHasTool.deleteAt == None))\
             .all()
 
-
         tools_dict = {}
         for tool in tools:
             if tool.stage in tools_dict.keys():
@@ -72,38 +76,94 @@ class PipelineService:
         tools_dict = json.dumps(tools_dict)
 
         # 파이프라인 생성
-        pipeline = PipelineInterface(JENKINS_URL, JENKINS_ID, JENKINS_PW)
-
-        # 한승이가 만드는 jenkins 모듈이 성공 여부 등의 결과를 넘겨주도록 수정
-        result = pipeline.createPipeline(params['pipeline_name'], params['repo_url'], tools_dict, f"*/{params['branch']}", params["jenkins_token"])
-
+        try:
+            pipeline = Pipeline(JENKINS_URL, JENKINS_ID, JENKINS_PW, params.get_element("pipeline_name"))
+        except Exception as e:
+            current_app.logger.debug("[create_pipeline] Pipeline constructor error")
+            current_app.logger.debug(e)
+            return resp(500, "create pipeline failed")
+        
+        try:    
+            pipeline.create_pipeline(tools_dict, params.get_element("repo_url"), params.get_element("branch"))
+        except Exception as e:
+            current_app.logger.debug("[create_pipeline] Pipeline.create_pipeline() error")
+            current_app.logger.debug(e)
+            return resp(500, "create pipeline failed")
+        
         return resp(201, "create pipeline success")
 
     # 파이프라인 리스트 return (한승이 모듈 사용하기)
-    # def pipeline_list():
+    def pipeline_list():
+        try:
+            pipeline = Pipeline(JENKINS_URL, JENKINS_ID, JENKINS_PW, None)
+        except Exception as e:
+            current_app.logger.debug("[create_pipeline] Pipeline constructor error")
+            current_app.logger.debug(e)
+            return resp(500, "get pipeline failed")
+        
+        try:
+            result = pipeline.get_pipelines()
+        except Exception as e:
+            current_app.logger.debug("[create_pipeline] Pipeline.get_pipelines() error")
+            current_app.logger.debug(e)
+            return resp(500, "get pipeline failed")
+        
+        return resp(201, "pipeline list success", result)
+        
 
     # 파이프라인 수정(한승이 모듈 사용하기)
     # def update_pipeline():
 
-    # 파이프라인 제거(한승이 모듈 사용하기)
-    # def delete_pipeline():
+    # 파이프라인 제거
+    def delete_pipeline():
+        try:
+            params = PipelineSerialize(request.get_json())
+        except Exception as e:
+            current_app.logger.debug("[delete pipeline] error")
+            current_app.logger.debug(e)
+            return resp(500, "delete pipeline failed")
+        
+        try:
+            pipeline = Pipeline(JENKINS_URL, JENKINS_ID, JENKINS_PW, params.get_element("pipeline_name"))
+        except Exception as e:
+            current_app.logger.debug("[delete pipeline] Pipeline constructor error")
+            current_app.logger.debug(e)
+            return resp(500, "delete pipeline failed")
+        
+        try:
+            pipeline.delete_pipeline()
+        except Exception as e:
+            current_app.logger.debug("[delete pipeline] Pipeline.delete_pipeline() error")
+            current_app.logger.debug(e)
+            return resp(500, "delete pipeline failed")
+        
+        return resp(201, "pipeline delete success")
 
-    # 파이프라인 실행시키기(한승이 모듈 사용하기)
+    # 파이프라인 실행시키기
     def run_pipeline():
         try:
-            params = request.get_json()
-
-            if( not params['pipeline_name'] or not params['branch']):
-                return resp(400, "check your values")        
-
-            # jenkins 설정
-            pipeline = PipelineInterface(JENKINS_URL, JENKINS_ID, JENKINS_PW)
-            
-            # 파이프라인 실행(추후, return 값 받아서 handling하기)
-            pipeline.runPipeline(f"{params['pipeline_name']}/{params['branch']}")
-            
-            return resp(200, "test")
-        
+            params = PipelineSerialize(request.get_json())
         except Exception as e:
-            print(e)
+            current_app.logger.debug("[run_pipeline] error")
+            current_app.logger.debug(e)
             return resp(500, "run pipeline failed")
+
+        if params.run_param_check() == False:
+            return resp(400, "check your values")
+
+        try:
+            pipeline = Pipeline(JENKINS_URL, JENKINS_ID, JENKINS_PW, params.get_element("pipeline_name"))
+        except Exception as e:
+            current_app.logger.debug("[run_pipeline] Pipeline constructor error")
+            current_app.logger.debug(e)
+            return resp(500, "run pipeline failed")
+        
+        # 파이프라인 실행
+        try:
+            pipeline.run_pipeline()
+        except Exception as e:
+            current_app.logger.debug("[run_pipeline] Pipeline.run_pipeline() error")
+            current_app.logger.debug(e)
+            return resp(500, "run pipeline failed")
+            
+        return resp(200, "run pipeline success")

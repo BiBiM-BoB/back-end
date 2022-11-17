@@ -1,7 +1,6 @@
 from script.setup_ec2 import SetupSSH, SetupEC2
 from script.setup_local import SetupLocal
 
-
 def selectSetupMode():
     usage = """
     Setup Jenkins as Docker out of Docker Model.

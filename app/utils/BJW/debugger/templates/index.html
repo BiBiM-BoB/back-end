@@ -23,6 +23,7 @@
     </style>
 </head>
 <body>
+<form method="POST" target="{{ url_for('debug') }}" id="debugForm">
     <div id="debug" class="section">
         <div class="section-center">
             <div class="container">
@@ -69,12 +70,28 @@ node {
 }</textarea>
                                 <script>
                                     let textarea = document.getElementById('debugTextArea')
+
                                     let editor = CodeMirror.fromTextArea(textarea, {
                                         lineNumbers: true,
                                         tabSize: 2,
                                         mode: 'groovy',
                                         theme: 'mbo'
-                                    })
+                                    });
+                                    
+                                    function check_submit(e) {
+                                        let t = new FormData(document.getElementById('debugForm'))
+                                        const code = editor.doc.getValue();
+                                        t.append('code', code);
+
+                                        fetch('/debug', {
+                                            method: 'POST',
+                                            body: t
+                                        }).then(response => {
+                                                if (response.redirected) {
+                                                    window.location.href = response.url;
+                                                }
+                                        })
+                                    };
                                 </script>
                             </div>
                         </div>
@@ -94,6 +111,8 @@ node {
                                     <br>
                                     <div class="input-group form-group">
                                         <input name="target" class="form-control" placeholder="Target Git (github repo dir)">
+                                        <br>
+                                        <input name="target_branch" class="form-control" placeholder="Target branch">
                                     </div>
                                     <br>
                                     <div class="input-group form-group">
@@ -125,12 +144,13 @@ node {
                     </div>
                     <br>
                     <div class="d-grid gap-2">
-                        <button class="btn btn-primary" type="submit">Debug!</button>
+                        <button class="btn btn-primary" type="button" onclick="check_submit()">Debug!</button>
                     </div>
 
                 </div>
             </div>
         </div>
     </div>
+</form>
 </body>
 </html>

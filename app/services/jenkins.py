@@ -23,8 +23,8 @@ class JenkinsService:
                 return resp(400, "check your values")
 
             # front 연동전 hard coding
-            # tools = params['tools']
-            tools = { 'sis': True, 'ZAP': True, "tt": False }
+            tools = params['tools']
+            # tools = { 'sis': True, 'ZAP': True, "tt": False }
             # owner_id = who()
             owner_id = 1
             
