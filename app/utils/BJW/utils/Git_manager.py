@@ -1,19 +1,22 @@
 from git import Repo
 from git.remote import FetchInfo
 from git.exc import GitCommandError
-
 import os
+import platform
 import shutil
 
-from pathlib import Path
+from pathlib import Path, PurePosixPath, PureWindowsPath
 
 
 class GitManager:
     def __init__(self, local, remote=None):
         self.local = local
         self.remote = remote
-        self.localPath = Path(local)
-        self.remotePath = Path(remote)
+
+        if platform.system() == 'Linux':
+            self.localPath = PurePosixPath(local)
+        else:
+            self.localPath = PureWindowsPath(local)
     
     def clone(self):
         repo = Repo.clone_from(self.remote, self.local)
@@ -46,8 +49,8 @@ class GitManager:
         except GitCommandError: # if already cloned, pull
             flag = self.pull()
         
-        if flag is FetchInfo.HEAD_UPTODATE: # if git is up-to-date
-            return False
+            if flag is FetchInfo.HEAD_UPTODATE: # if git is up-to-date
+                return False
         
         return True
     
@@ -58,7 +61,7 @@ class GitManager:
     def purge(self, subdir=None):
         """
             Purges all files under subdir.
-            If subdir is None, then purges files in root dir.
+            If subdir is None, the purges files in root dir.
         """
         if subdir:
             path = str(self.localPath/subdir)

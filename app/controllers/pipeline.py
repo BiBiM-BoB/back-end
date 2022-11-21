@@ -16,11 +16,15 @@ bp = Blueprint('pipeline', __name__, url_prefix='/api/v1/pipeline')
 def create_pipeline():
     return PipelineService.create_pipeline()
 
-# @bp.route('/pipelineList', methods=['GET'])
-
+@bp.route('/pipelineList', methods=['GET'])
+def get_pipeline_list():
+    return PipelineService.pipeline_list()
+    
 # @bp.route('/updatePipeline/<id>', methods=['POST'])
 
-# @bp.route('/deletePipeline/<id>', methods=['POST'])
+@bp.route('/deletePipeline', methods=['POST'])
+def delete_pipeline():
+    return PipelineService.delete_pipeline()
 
 @bp.route('/runPipeline', methods=['POST'])
 # @login_required

@@ -10,8 +10,12 @@
 
 import xml.etree.ElementTree as ET
 import shutil
+import sys
+import os
 
-from ...utils.Git_manager import GitManager
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))))
+
+from utils.Git_manager import GitManager
 
 class XMLGenerator(GitManager):
     def __init__(self, local, remote, pipeline_name, base_xml='config.xml'):
@@ -23,7 +27,12 @@ class XMLGenerator(GitManager):
 
         xml_path = f"xmls/{pipeline_name}"
         self.xml_path = str(self.localPath/xml_path)
-    
+
+        try:
+            os.makedirs(str(self.localPath/'xmls'))
+        except FileExistsError:
+            print("[+] xmls dir exists.")
+
     def generate(self, target, target_branch, jenkinsfile_path, *args):
         element_list = [
             ('remote', target), 
@@ -63,10 +72,10 @@ class XMLGenerator(GitManager):
         for target in it:
             original = target.text
             # '$bibim'
-            modified = original.replace(original, value)
+            modified = original.replace('$bibim', value)
             target.text = modified
         self.target_xml.write(self.xml_path, method='html', encoding='utf-8', xml_declaration=True)
 
     def _replace_contents(self, *args):
-        for item in args:
+        for item in args[0]:
             self._replace_content(item[0], item[1])

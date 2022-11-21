@@ -17,9 +17,13 @@ There are two public fuctions in class JenkinsfileGenerator(),
 '''
 
 import os
+import sys
 import json
 
-from ...utils.Git_manager import GitManager
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))))
+
+from utils.Git_manager import GitManager
+
 
 class JenkinsfileGenerator(GitManager):
     def __init__(self, local, remote, pipeline_name):
@@ -27,8 +31,13 @@ class JenkinsfileGenerator(GitManager):
         super().__init__(local, remote)
 
         self.pipeline_name = pipeline_name
-        self.jenkinsfile_path = "Jenkinsfiles/{pipeline_name}"
-    
+        self.jenkinsfile_path = f"Jenkinsfiles/{pipeline_name}"
+
+        try:
+            os.makedirs(str(self.localPath / 'Jenkinsfiles'))
+        except FileExistsError:
+            print("[+] Jenkinsfile dir exists.")
+
     def generate_by_json(self, tools_json):
         # json -> list
         self.tool_list = self._json_to_list(tools_json)
@@ -47,7 +56,6 @@ class JenkinsfileGenerator(GitManager):
 
         return self.jenkinsfile_path
 
-
     def generate_by_raw_groovy(self, groovy):
         self._generate(groovy)
 
@@ -55,10 +63,9 @@ class JenkinsfileGenerator(GitManager):
 
     def _generate(self, groovy: str):
         local_jenkinsfile = str(self.localPath / self.jenkinsfile_path)
-        with open(local_jenkinsfile) as f:
+        with open(local_jenkinsfile, 'w') as f:
             f.write(groovy)
-    
-    
+
     def _json_to_list(self, tools_json) -> list:
         tools_list = []
         tools_json = json.loads(tools_json)
@@ -76,7 +83,7 @@ class JenkinsfileGenerator(GitManager):
             if stage in tool:
                 ret.append(tool)
         return ret
-        
+
     # Let's say,
     # self._write_stages('DAST/ZAP')
     def _write_stages(self, tool, part=None):
@@ -91,14 +98,14 @@ class JenkinsfileGenerator(GitManager):
                     if int(files[i].split('.')[0]) > 0:
                         files[i:], files[:i] = files[:i], files[i:]
                         break
-            
-            elif part=='start':
+
+            elif part == 'start':
                 for i in range(len(files)):
                     if int(files[i].split('.')[0]) > 0:
                         files = files[i:]
                         break
-            
-            elif part=='stop':
+
+            elif part == 'stop':
                 for i in range(len(files)):
                     if int(files[i].split('.')[0]) > 0:
                         files = files[:i]
@@ -107,7 +114,7 @@ class JenkinsfileGenerator(GitManager):
             for f in files:
                 f = open(os.path.join(dirname, f), 'r')
                 text = f.read()
-                
+
                 if text[:6] == "$bibim":
                     f.close()
                     stage_list = self._find_stage(text.split(':')[1], self.tool_list)

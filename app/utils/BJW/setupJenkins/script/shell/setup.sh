@@ -22,3 +22,6 @@ sudo apt-get install -y openjdk-11-jre
 
 sudo groupadd docker
 sudo usermod -aG docker `whoami`
+
+sudo docker build -t bibim-jenkins:0.1 .
+sudo docker volume create jenkins
