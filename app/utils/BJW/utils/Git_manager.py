@@ -2,7 +2,11 @@ from git import Repo
 from git.remote import FetchInfo
 from git.exc import GitCommandError
 
+import os
+import shutil
+
 from pathlib import Path
+
 
 class GitManager:
     def __init__(self, local, remote=None):
@@ -50,3 +54,37 @@ class GitManager:
     def commit_and_push(self, message):
         self.commit(message)
         self.push()
+
+    def purge(self, subdir=None):
+        """
+            Purges all files under subdir.
+            If subdir is None, then purges files in root dir.
+        """
+        if subdir:
+            path = str(self.localPath/subdir)
+        else:
+            path = self.local
+
+        try:
+            for file in os.scandir(path):
+                os.remove(file)
+        except IsADirectoryError:
+            pass
+        except FileNotFoundError:
+            print("[!] File doesn't exists.")
+
+
+    def mkdirs(self, *args):
+        for arg in args:
+            target = str(self.localPath/arg)
+            try:
+                os.makedirs(target)
+            except FileExistsError:
+                print(f"[+] {target} already exists!")
+
+    def reload(self):
+        """
+            Removes this git and clones again from remote.
+        """
+        shutil.rmtree(self.local)
+        self.clone()
