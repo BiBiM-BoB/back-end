@@ -25,12 +25,12 @@ class XMLGenerator(GitManager):
         self.xml_path = str(self.localPath/xml_path)
     
     def generate(self, target, target_branch, jenkinsfile_path, *args):
-        element_list = list(
+        element_list = [
             ('remote', target), 
             ('name', target_branch),
             ('remoteJenkinsFile', jenkinsfile_path),
             ('url', self.remote)
-        )
+        ]
 
         self.target_xml = self._copyXML()
         self.root = self.target_xml.getroot()
