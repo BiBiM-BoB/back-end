@@ -12,6 +12,7 @@ from ..models.tool import Tool
 from ..utils.response import resp
 from ..utils.db import db_apply
 
+from ..utils.BJW.core.jenkins import *
 from ..utils.BJW.core.pipeline import *
 
 
@@ -77,16 +78,21 @@ class PipelineService:
 
         # 파이프라인 생성
         try:
-            pipeline = Pipeline(JENKINS_URL, JENKINS_ID, JENKINS_PW, params.get_element("pipeline_name"))
+            jenkins = Jenkins(JENKINS_URL, JENKINS_ID, JENKINS_PW)
         except Exception as e:
-            current_app.logger.debug("[create_pipeline] Pipeline constructor error")
+            current_app.logger.debug("[create_pipeline] Jenkins constructor error")
             current_app.logger.debug(e)
             return resp(500, "create pipeline failed")
         
         try:    
-            pipeline.create_pipeline(tools_dict, params.get_element("repo_url"), params.get_element("branch"))
+            jenkins.create_pipeline(
+                params.get_element("pipeline_name"),
+                params.get_element("repo_url"),
+                params.get_element("branch"),
+                tools_dict
+            )
         except Exception as e:
-            current_app.logger.debug("[create_pipeline] Pipeline.create_pipeline() error")
+            current_app.logger.debug("[create_pipeline] Jenkins.create_pipeline() error")
             current_app.logger.debug(e)
             return resp(500, "create pipeline failed")
         
@@ -95,16 +101,16 @@ class PipelineService:
     # 파이프라인 리스트 return (한승이 모듈 사용하기)
     def pipeline_list():
         try:
-            pipeline = Pipeline(JENKINS_URL, JENKINS_ID, JENKINS_PW, None)
+            jenkins = Jenkins(JENKINS_URL, JENKINS_ID, JENKINS_PW)
         except Exception as e:
-            current_app.logger.debug("[create_pipeline] Pipeline constructor error")
+            current_app.logger.debug("[pipeline_list] Jenkins constructor error")
             current_app.logger.debug(e)
             return resp(500, "get pipeline failed")
         
         try:
-            result = pipeline.get_pipelines()
+            result = jenkins['pipeline_list']
         except Exception as e:
-            current_app.logger.debug("[create_pipeline] Pipeline.get_pipelines() error")
+            current_app.logger.debug("[create_pipeline] Jenkins['pipeline_list'] error")
             current_app.logger.debug(e)
             return resp(500, "get pipeline failed")
         
@@ -124,16 +130,17 @@ class PipelineService:
             return resp(500, "delete pipeline failed")
         
         try:
-            pipeline = Pipeline(JENKINS_URL, JENKINS_ID, JENKINS_PW, params.get_element("pipeline_name"))
+            jenkins = Jenkins(JENKINS_URL, JENKINS_ID, JENKINS_PW)
+            pipeline = jenkins.get_pipeline(params.get_element("pipeline_name"), params.get_element("branch"))
         except Exception as e:
             current_app.logger.debug("[delete pipeline] Pipeline constructor error")
             current_app.logger.debug(e)
             return resp(500, "delete pipeline failed")
         
         try:
-            pipeline.delete_pipeline()
+            pipeline.delete()
         except Exception as e:
-            current_app.logger.debug("[delete pipeline] Pipeline.delete_pipeline() error")
+            current_app.logger.debug("[delete pipeline] Pipeline.delete() error")
             current_app.logger.debug(e)
             return resp(500, "delete pipeline failed")
         
@@ -152,7 +159,8 @@ class PipelineService:
             return resp(400, "check your values")
 
         try:
-            pipeline = Pipeline(JENKINS_URL, JENKINS_ID, JENKINS_PW, params.get_element("pipeline_name"))
+            jenkins = Jenkins(JENKINS_URL, JENKINS_ID, JENKINS_PW)
+            pipeline = jenkins.get_pipeline(params.get_element("pipeline_name"), params.get_element("branch"))
         except Exception as e:
             current_app.logger.debug("[run_pipeline] Pipeline constructor error")
             current_app.logger.debug(e)
@@ -160,7 +168,7 @@ class PipelineService:
         
         # 파이프라인 실행
         try:
-            pipeline.run_pipeline()
+            pipeline.run()
         except Exception as e:
             current_app.logger.debug("[run_pipeline] Pipeline.run_pipeline() error")
             current_app.logger.debug(e)
