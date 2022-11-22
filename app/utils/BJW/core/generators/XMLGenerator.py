@@ -23,7 +23,7 @@ class XMLGenerator(GitManager):
         super().__init__(local, remote)
         self.pipeline_name = pipeline_name
 
-        base_xml = f"xmls/{base_xml}"
+        base_xml = f"components/xmls/{base_xml}"
         self.base_xml = str(self.localPath/base_xml)
 
         xml_path = f"xmls/{pipeline_name}"

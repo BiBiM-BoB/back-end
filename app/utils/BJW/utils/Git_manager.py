@@ -27,6 +27,8 @@ class GitManager:
         repo = Repo(self.local)
         info = repo.remotes.origin.pull()
 
+        print(f"[+] Pulled from {self.remote}, into {self.local}")
+
         return info[0].flags  # https://gitpython.readthedocs.io/en/stable/reference.html?#git.remote.FetchInfo
 
     def commit(self, message):

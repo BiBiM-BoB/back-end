@@ -28,7 +28,7 @@ class Jenkins(api4jenkins.Jenkins):
     def __init__(self, url, username, token):
         super().__init__(url, auth=(username, token))
 
-    def create_pipeline(self, pipeline_name, target, target_branch, tool_json=None, groovy=None, token=None, *args) -> Pipeline:
+    def create_pipeline(self, pipeline_name, target, target_branch, tool_json=None, groovy=None, debug=False, token=None, *args) -> Pipeline:
 
         #  check if pipeline already exists
         check = (pipeline_name, target_branch)
@@ -36,7 +36,7 @@ class Jenkins(api4jenkins.Jenkins):
             raise PipelineExistsError(pipeline_name, target_branch)
 
         # 0. Init gits
-        initializer = Initializer(self.url)
+        initializer = Initializer(self.url, debug)
 
         # 1. create Jenkinsfile according to tool_json
         JG = JenkinsfileGenerator(

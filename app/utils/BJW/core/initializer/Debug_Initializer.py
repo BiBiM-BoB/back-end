@@ -16,11 +16,11 @@
         (3) git push
 
 '''
-import os, sys
+import os
 import pathlib
 import platform
-import shutil
-from distutils.dir_util import copy_tree
+import sys
+
 from werkzeug.datastructures import MultiDict, FileStorage
 
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))))
@@ -52,8 +52,7 @@ class DebugInitializer:
         except FileExistsError:
             pass
 
-        shutil.rmtree(self.jenkins_git.local)
-        self.jenkins_git.clone_or_pull()
+        self.jenkins_git.reload()
         self.sec_git.clone_or_pull()
 
     def debug_mode(self, input_dockerfile: FileStorage, input_script_dir: MultiDict[FileStorage], ssh_key_path=None):

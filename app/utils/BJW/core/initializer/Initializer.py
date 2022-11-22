@@ -14,6 +14,15 @@ Procedure:
         (1) remove "~/bibim/userContent/sectools/"
         (2) cp "~/bibim/sectools-completed/" into step (1)
         (3) jenkins-git push
+
+    jenkins-git(/userContent):
+        |-Jenkinsfiles
+        |-xmls
+        |-components
+            |-groovy
+            |-xmls
+            |-DAST/ZAP/ ...
+        |-debug
 '''
 
 import os
@@ -29,7 +38,7 @@ from utils.Git_manager import GitManager
 
 if __name__ == '__main__':
     from ...utils.Git_manager import GitManager
-# TODO: setup에 git clone 포함
+
 
 class Initializer:
 
@@ -42,7 +51,7 @@ class Initializer:
     
     sec_git = GitManager(str(root/'sectools-completed'), r"https://github.com/BiBiM-BoB/sectools-completed") # TODO: sec-git init
     
-    def __init__(self, jenkins_url):
+    def __init__(self, jenkins_url, debug=False):
         print("[+] Initializing...")
 
         if jenkins_url[-1] == r'/':
@@ -55,11 +64,13 @@ class Initializer:
         self._setup_dir()
 
         # clone/pull jenkins-git and sec-git
-        updated = self._setup_git()
+        updated = False
+        if not debug:
+            updated = self._setup_git()
 
         # if sec-git is updated, copy sec-git into jenkins-git, and push
-        # if updated:
-        self._update_jenkins_git()
+        if updated:
+            self._update_jenkins_git()
         
         print("[+] Finished Initializing!")
 
@@ -70,27 +81,18 @@ class Initializer:
             print(f"[+] {self.root} already exists!")
     
     def _setup_git(self) -> bool:
-        self.jenkins_git.clone_or_pull()
+        self.jenkins_git.reload()
         flag = self.sec_git.clone_or_pull()
 
         return flag
     
     def _update_jenkins_git(self):
-        try:
-            shutil.rmtree(self.jenkins_git.localPath/'jenkins')
-            os.makedirs(self.jenkins_git.localPath/'jenkins')
-        except FileNotFoundError:
-            pass
+        # removes all files under /components
+        self.jenkins_git.purge('components')
 
-        try:
-            shutil.rmtree(self.jenkins_git.localPath/'components')
-            os.makedirs(self.jenkins_git.localPath/'components')
-        except FileNotFoundError:
-            pass
-
-        dir_util.copy_tree(str(self.sec_git.localPath/'jenkins'/'groovy'), str(self.jenkins_git.localPath/'groovy'))
-        dir_util.copy_tree(str(self.sec_git.localPath/'jenkins'/'xmls'), str(self.jenkins_git.localPath/'xmls'))
         dir_util.copy_tree(str(self.sec_git.localPath/'components'), str(self.jenkins_git.localPath/'components'))
+        dir_util.copy_tree(str(self.sec_git.localPath/'jenkins'/'groovy'), str(self.jenkins_git.localPath/'components/groovy'))
+        dir_util.copy_tree(str(self.sec_git.localPath/'jenkins'/'xmls'), str(self.jenkins_git.localPath/'components/xmls'))
 
         self.jenkins_git.commit_and_push('updated git')
 
