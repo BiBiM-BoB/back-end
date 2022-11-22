@@ -17,6 +17,7 @@ sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(os.path.abspath(
 
 from utils.Git_manager import GitManager
 
+
 class XMLGenerator(GitManager):
     def __init__(self, local, remote, pipeline_name, base_xml='config.xml'):
         super().__init__(local, remote)

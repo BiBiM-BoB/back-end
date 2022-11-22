@@ -1,6 +1,7 @@
 import platform
 import pathlib
 import os
+import sys
 import xml.etree.ElementTree as ET
 
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))))
@@ -8,7 +9,7 @@ sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(os.path.abspath(
 from utils.Git_manager import GitManager
 
 if __name__ == '__main__':
-    from ...utils.Git_manager import GitManager
+    from ..utils.Git_manager import GitManager
 
 
 class NoSuchElementError(Exception):
@@ -47,7 +48,7 @@ class Config:
         return text
 
     @staticmethod
-    def _url_init(self, jenkins_url):
+    def _url_init(jenkins_url):
         if jenkins_url[-1] == r'/':
             return jenkins_url + 'userContent.git'
         else:

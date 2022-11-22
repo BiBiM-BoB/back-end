@@ -41,9 +41,10 @@ class JenkinsfileGenerator(GitManager):
     def generate_by_json(self, tools_json):
         # json -> list
         self.tool_list = self._json_to_list(tools_json)
+        groovy = '// ' + ', '.join(self.tool_list) + '\n'
 
         # generate groovy script
-        groovy = self._write_stages('FUNC', 'start')
+        groovy += self._write_stages('FUNC', 'start')
         for tool in self.tool_list:
             groovy += self._write_stages(tool)
         groovy += self._write_stages('FUNC', 'stop')

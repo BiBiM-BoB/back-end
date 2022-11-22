@@ -22,12 +22,11 @@
 import time
 from typing import Generator
 
-from jenkins import Jenkins
-from config import Config
+from .config import Config
 
 
 class Pipeline:
-    def __init__(self, jenkins_instance: Jenkins, pipeline_name, branch, token=None):
+    def __init__(self, jenkins_instance, pipeline_name, branch, token=None):
         self.jenkins = jenkins_instance
         self.pipeline_name = pipeline_name
         self.branch = branch

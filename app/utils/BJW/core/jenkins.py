@@ -13,7 +13,7 @@ import api4jenkins
 from api4jenkins.job import WorkflowJob
 
 from .pipeline import Pipeline
-from .utils.Initializer import Initializer
+from .initializer.Initializer import Initializer
 from .generators.JenkinsfileGenerator import JenkinsfileGenerator
 from .generators.XMLGenerator import XMLGenerator
 
@@ -29,6 +29,7 @@ class Jenkins(api4jenkins.Jenkins):
         super().__init__(url, auth=(username, token))
 
     def create_pipeline(self, pipeline_name, target, target_branch, tool_json=None, groovy=None, token=None, *args) -> Pipeline:
+
         #  check if pipeline already exists
         check = (pipeline_name, target_branch)
         if check in self.get_pipelines(True):
