@@ -24,6 +24,7 @@ sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(os.path.abspath(
 
 from utils.Git_manager import GitManager
 
+
 class JenkinsfileGenerator(GitManager):
     def __init__(self, local, remote, pipeline_name):
         # set basic jenkins-git property
@@ -33,16 +34,17 @@ class JenkinsfileGenerator(GitManager):
         self.jenkinsfile_path = f"Jenkinsfiles/{pipeline_name}"
 
         try:
-            os.makedirs(str(self.localPath/'Jenkinsfiles'))
+            os.makedirs(str(self.localPath / 'Jenkinsfiles'))
         except FileExistsError:
             print("[+] Jenkinsfile dir exists.")
-            
+
     def generate_by_json(self, tools_json):
         # json -> list
         self.tool_list = self._json_to_list(tools_json)
+        groovy = '// ' + ', '.join(self.tool_list) + '\n'
 
         # generate groovy script
-        groovy = self._write_stages('FUNC', 'start')
+        groovy += self._write_stages('FUNC', 'start')
         for tool in self.tool_list:
             groovy += self._write_stages(tool)
         groovy += self._write_stages('FUNC', 'stop')
@@ -55,7 +57,6 @@ class JenkinsfileGenerator(GitManager):
 
         return self.jenkinsfile_path
 
-
     def generate_by_raw_groovy(self, groovy):
         self._generate(groovy)
 
@@ -65,8 +66,7 @@ class JenkinsfileGenerator(GitManager):
         local_jenkinsfile = str(self.localPath / self.jenkinsfile_path)
         with open(local_jenkinsfile, 'w') as f:
             f.write(groovy)
-    
-    
+
     def _json_to_list(self, tools_json) -> list:
         tools_list = []
         tools_json = json.loads(tools_json)
@@ -84,13 +84,17 @@ class JenkinsfileGenerator(GitManager):
             if stage in tool:
                 ret.append(tool)
         return ret
-        
+
     # Let's say,
     # self._write_stages('DAST/ZAP')
     def _write_stages(self, tool, part=None):
         # then this function will return Jenkinsfile components about running ZAP, which is variable 'stages' below.
         groovy = ""
+<<<<<<< HEAD
         component_dir = str(self.localPath/'groovy')
+=======
+        component_dir = self.localgitdir + 'components/groovy'
+>>>>>>> aa6d2bd0715dc6337f269e349070a68b9c516790
         for dirname, _, files in os.walk(component_dir + tool + '/'):
             print(component_dir + tool)
             files.sort()
@@ -99,14 +103,14 @@ class JenkinsfileGenerator(GitManager):
                     if int(files[i].split('.')[0]) > 0:
                         files[i:], files[:i] = files[:i], files[i:]
                         break
-            
-            elif part=='start':
+
+            elif part == 'start':
                 for i in range(len(files)):
                     if int(files[i].split('.')[0]) > 0:
                         files = files[i:]
                         break
-            
-            elif part=='stop':
+
+            elif part == 'stop':
                 for i in range(len(files)):
                     if int(files[i].split('.')[0]) > 0:
                         files = files[:i]
@@ -115,7 +119,7 @@ class JenkinsfileGenerator(GitManager):
             for f in files:
                 f = open(os.path.join(dirname, f), 'r')
                 text = f.read()
-                
+
                 if text[:6] == "$bibim":
                     f.close()
                     stage_list = self._find_stage(text.split(':')[1], self.tool_list)

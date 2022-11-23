@@ -34,7 +34,7 @@ class AWSManager:
 
     def create_ec2(self, instance_name, key_name,
                    image_id='ami-058165de3b7202099',
-                   instance_type='t3a.small',
+                   instance_type='t3a.medium',
                    security_group_id='sg-0aea7cc41003b6fcb',  # bibim_sg
                    subnet_id='subnet-0960ede25884bc706'):
 

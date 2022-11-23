@@ -17,12 +17,13 @@ sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(os.path.abspath(
 
 from utils.Git_manager import GitManager
 
+
 class XMLGenerator(GitManager):
     def __init__(self, local, remote, pipeline_name, base_xml='config.xml'):
         super().__init__(local, remote)
         self.pipeline_name = pipeline_name
 
-        base_xml = f"xmls/{base_xml}"
+        base_xml = f"components/xmls/{base_xml}"
         self.base_xml = str(self.localPath/base_xml)
 
         xml_path = f"xmls/{pipeline_name}"
@@ -72,10 +73,10 @@ class XMLGenerator(GitManager):
         for target in it:
             original = target.text
             # '$bibim'
-            modified = original.replace(original, value)
+            modified = original.replace('$bibim', value)
             target.text = modified
         self.target_xml.write(self.xml_path, method='html', encoding='utf-8', xml_declaration=True)
 
     def _replace_contents(self, *args):
-        for item in args:
+        for item in args[0]:
             self._replace_content(item[0], item[1])

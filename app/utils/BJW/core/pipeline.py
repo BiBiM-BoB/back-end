@@ -1,57 +1,116 @@
-import jenkinsapi
-from jenkinsapi.utils.crumb_requester import CrumbRequester
+'''OneDayGinger
 
-from .jenkins import Jenkins
-from .utils.Initializer import Initializer
-from .generators.JenkinsfileGenerator import JenkinsfileGenerator
-from .generators.XMLGenerator import XMLGenerator
+# This file controls pipeline directly.
+
+# Call
+    Pipeline(jenkins_instance, pipeline_name, branch)
+
+# Properties
+    (1) stages -> list
+    (2) jenkinsfile -> jenkinsfile_name, jenkinsfile_text
+    (3) config -> dictionary
+    (4) history
+    (5) stream -> Generator
+
+# Functions
+    (1) modify -> delete and create pipeline while preserving history
+    (2) run -> log stream
+    (3) delete
+
+'''
+
+import time
+from typing import Generator
+
+from .config import Config
 
 
 class Pipeline:
-    def __init__(self, jenkins_url, jenkins_username, jenkins_token, pipeline_name):
+    def __init__(self, jenkins_instance, pipeline_name, branch, token=None):
+        self.jenkins = jenkins_instance
         self.pipeline_name = pipeline_name
-        self.url = jenkins_url
-        self.username = jenkins_username
-        self.token = jenkins_token
+        self.branch = branch
+        self.full_name = pipeline_name + '/' + branch
+        self.token = token
 
-        self.initializer = Initializer(jenkins_url)
-        self.jenkins = Jenkins(jenkins_url, jenkins_username, jenkins_token)
+    def run(self) -> Generator[str, None, None]:
+        """
+            Runs this pipeline.
 
-    def create_pipeline(self, tool_json, target, target_branch, build_token=None, *args):
-        # 1. create Jenkinsfile according to tool_json
-        JG = JenkinsfileGenerator(self.initializer.jenkins_git.local, self.initializer.jenkins_git.remote, self.pipeline_name)
-        jenkinsfile = JG.generate_by_json(tool_json)
+            Return: iterator of a log stream
+        """
+        job = self.jenkins.build_job(self.full_name)
 
-        # 2. create config.xml
-        XG = XMLGenerator(self.initializer.jenkins_git.local, self.initializer.jenkins_git.remote, self.pipeline_name)
-        xml = XG.generate(target, target_branch, jenkinsfile)
+        while not job.get_build():
+            time.sleep(1)
+        build = job.get_build()
 
-        # 3. create pipeline with that two files
-        job = self.jenkins.create_job(self.pipeline_name, xml)
-    
-    def create_pipeline_by_raw_groovy(self, groovy, target, target_branch, build_token=None, *args):
-        JG = JenkinsfileGenerator(self.initializer.jenkins_git.local, self.initializer.jenkins_git.remote, self.pipeline_name)
-        jenkinsfile = JG.generate_by_raw_groovy(groovy)
+        return build.progressive_output()
 
-        XG = XMLGenerator(self.initializer.jenkins_git.local, self.initializer.jenkins_git.remote, self.pipeline_name)
-        xml = XG.generate(target, target_branch, jenkinsfile)
+    def delete(self):
+        """
+            Deletes this pipeline.
+        """
+        self.jenkins.delete_job(self.full_name)
 
-        job = self.jenkins.create_job(self.pipeline_name, xml)
+    def modify(self, target, branch, tool_json=None, groovy=None, token=None, *args):
+        self.delete()
+        return self.jenkins.create_pipeline(
+            self.pipeline_name,
+            target, branch, tool_json, groovy, token, args
+        )
 
-    def run_pipeline(self):
-        crumb = CrumbRequester(username=self.username, password=self.token, baseurl=self.url)
-        jenkins = jenkinsapi.jenkins.Jenkins(self.url, username=self.username, password=self.token, requester=crumb)
-        jenkins.build_job(self.pipeline_name)
-        print(f"[+] Successfully ran pipeline {self.pipeline_name}!")
+    @property
+    def status(self) -> tuple:
+        job = self.jenkins.get_job(self.full_name)
+        build = job.get_last_build()
 
-    def delete_pipeline(self):
-        job = self.jenkins.delete_job(self.pipeline_name)
+        return build.building, build.result
 
-    def get_pipeline(self):
+    @property
+    def stream(self):
+        return self._get_stream()
+
+    @property
+    def stages(self):
+        with open(self.config['jenkinsfile_abs_path'], 'r', encoding='utf-8') as f:
+            firstline = f.readline()
+            stage_list = firstline.lstrip('// ').split(', ')
+        return stage_list
+
+    @property
+    def jenkinsfile_name(self):
+        return self.config['jenkinsfile']
+
+    @property
+    def config(self) -> dict:
+        config = Config(self.jenkins.url, self.pipeline_name)
+        p = config.jenkins_git.localPath
+
+        ret = dict()
+        ret['target_git'] = config['remote']
+        ret['branch'] = config['name']
+        ret['jenkinsfile'] = config['remoteJenkinsFile'].split('/')[-1]
+        ret['jenkinsfile_abs_path'] = str(p/config['remoteJenkinsFile'])
+
+        return ret
+
+
+    @property
+    def history(self):
         pass
 
-    def get_pipelines(self) -> list:
-        pipeline_list = []
-        for job in self.jenkins.iter_jobs():
-            pipeline_list.append(job.full_name)
-        return pipeline_list
+    def _get_stream(self) -> Generator[str, None, None]:
+        """
+            Gets a log stream.
+            If pipeline is not running, then returns last-build's log.
+
+            Return: iterator of a log stream
+        """
+        job = self.jenkins.get_job(self.full_name)
+        build = job.get_last_build()
+
+        return build.progressive_output()
+
+    def __getitem__(self, key):
+        return getattr(self, key)
