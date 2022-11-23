@@ -1,15 +1,8 @@
 import platform
 import pathlib
 import os
-import sys
+from getpass import getuser
 import xml.etree.ElementTree as ET
-
-sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))))
-
-from utils.Git_manager import GitManager
-
-if __name__ == '__main__':
-    from ..utils.Git_manager import GitManager
 
 
 class NoSuchElementError(Exception):
@@ -19,7 +12,7 @@ class NoSuchElementError(Exception):
 
 
 class Config:
-    user = os.getlogin()
+    user = getuser()
 
     if platform.system() == 'Linux':
         root = pathlib.PurePosixPath(f'/home/{user}/bibim/userContent/')

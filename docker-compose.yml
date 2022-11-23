@@ -1,0 +1,9 @@
+web:
+  build: .
+  command: sh -c "service mysql start && flask run --host=0.0.0.0 --port=52211"
+  ports:
+    - "52211:52211"
+  links:
+    - db
+db:
+  image: mongo:3.0.2

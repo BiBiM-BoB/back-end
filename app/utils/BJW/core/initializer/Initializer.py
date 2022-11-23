@@ -28,9 +28,9 @@ Procedure:
 import os
 import sys
 import pathlib
-import shutil
 import platform
 from distutils import dir_util
+from getpass import getuser
 
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))))
 
@@ -42,7 +42,7 @@ if __name__ == '__main__':
 
 class Initializer:
 
-    user = os.getlogin()
+    user = getuser()
 
     if platform.system() == 'Linux':
         root = pathlib.PurePosixPath(f'/home/{user}/bibim')
