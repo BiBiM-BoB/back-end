@@ -34,7 +34,7 @@ class PipelineSerialize:
             return True
         
     def run_param_check(self):
-        if(not self.data['pipeline_name'] or not self.data['repo_url'] or not self.data["branch"]):
+        if(not self.data['pipeline_name']):
             return False
         else:
             return True
@@ -59,21 +59,30 @@ class PipelineService:
         # jenkins파일이 가지고 있는 tool 목록들 가져오기
         # if ( tools = JenKinsHasToolQuery):
         #     resp(500)
-        tools = JenkinsHasTool.query\
-            .join(Tool, JenkinsHasTool.tool_id == Tool.id)\
-            .add_columns(Tool.name, Tool.stage)\
-            .filter(and_(JenkinsHasTool.jenkins_id == params['jenkins_id'], JenkinsHasTool.deleteAt == None))\
-            .all()
+        
+        
+        # 선택한 tool을 어떻게 관리할 것인지 새로 작성
+        # tools = JenkinsHasTool.query\
+        #     .join(Tool, JenkinsHasTool.tool_id == Tool.id)\
+        #     .add_columns(Tool.name, Tool.stage)\
+        #     .filter(and_(JenkinsHasTool.jenkins_id == 1, JenkinsHasTool.deleteAt == None))\
+        #     .all()
 
-        tools_dict = {}
-        for tool in tools:
-            if tool.stage in tools_dict.keys():
-                tools_dict[tool.stage][tool.name] = 1
-            else:
-                row = { f"{tool.name}": 1 }
-                tools_dict[tool.stage] = row
+        # tools_dict = {}
+        # for tool in tools:
+        #     if tool.stage in tools_dict.keys():
+        #         tools_dict[tool.stage][tool.name] = 1
+        #     else:
+        #         row = { f"{tool.name}": 1 }
+        #         tools_dict[tool.stage] = row
 
-        tools_dict = json.dumps(tools_dict)
+        # tools_dict = json.dumps(tools_dict)
+        
+        tools_dict = json.dumps({
+            "SAST": {
+                "CodeQL": 1
+            }
+        })
 
         # 파이프라인 생성
         try:
