@@ -15,14 +15,14 @@ def create_app():
         'version': 1,
         'formatters': {
             'default': {
-                'format': '[%(asctime)s] %(levelname)s in %(module)s [%(filename)s][%(funcName)s] : %(message)s ',
+                'format': '[%(asctime)s] %(levelname)s in %(module)s: %(message)s',
             }
         },
         'handlers': {
             'file': {
                 'level': 'DEBUG',
                 'class': 'logging.handlers.RotatingFileHandler',
-                'filename': os.path.join(LOGGING_PATH, "logs/bibim.app.log"),
+                'filename': "/home/bibim/back-end/app/logs/bibim.app.log",
                 'maxBytes': 1024 * 1024 * 5,  # 5 MB
                 'backupCount': 5,
                 'formatter': 'default',

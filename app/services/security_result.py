@@ -12,7 +12,9 @@ collection = mongo_db["securityresults"]
 class SecurityResultService:
     def find(id):
         try:            
-            result = collection.find_one({ "_id": ObjectId(id) })    
+            result = collection.find_one({ "_id": ObjectId(id) })
+            print("==============")
+            print(result)
             return resp(200, "success", result)
         except Exception as e:
             current_app.logger.debug("securityresult find service error")
