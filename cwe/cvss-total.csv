@@ -1,3 +1,4 @@
+cweId,cweURL,cveFrequency,cweToCvePath,cvedetailssiteHash,cvssv3
 79,//www.cvedetails.com/cwe-details/79/Failure-to-Preserve-Web-Page-Structure-039-Cross-site-Scr.html,20160,https://www.cvedetails.com/vulnerability-list/cweid-79/vulnerabilities.html,594961b79c378973682cafd728523d98e73bed58,4.031960917
 119,//www.cvedetails.com/cwe-details/119/Failure-to-Constrain-Operations-within-the-Bounds-of-a-Memor.html,11983,https://www.cvedetails.com/vulnerability-list/cweid-119/vulnerabilities.html,a76f56dbb935840fc028b135d550322223547356,7.598726061
 20,//www.cvedetails.com/cwe-details/20/Improper-Input-Validation.html,9176,https://www.cvedetails.com/vulnerability-list/cweid-20/vulnerabilities.html,5b38f07093ff05a63252a5a8e7d028e6927883ee,5.987323159
