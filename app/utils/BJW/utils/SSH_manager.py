@@ -19,6 +19,7 @@ import os
 
 from . import Interactive as interactive
 
+
 class SSHManager:
     def __init__(self, ip):
         # prepare ssh connection
@@ -26,13 +27,15 @@ class SSHManager:
         self.ssh = self._establish_ssh()
         self.channel = self._invoke_channel()
 
-
     def _establish_ssh(self):
         # connect this computer and target ec2
         # use RSA key verification
         key = paramiko.RSAKey.from_private_key_file(input('[?] Absolute path of your private key file: '))
         username = input('[?] Username of your target server (default: ubuntu): ')
-        if not username : username = 'ubuntu'
+        if not username:
+            username = 'ubuntu'
+
+        self.username = username
 
         ssh_client = paramiko.SSHClient()
         ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -48,13 +51,13 @@ class SSHManager:
         return channel
 
     def execute_command(self, command, verbose=True):
-        _, stdout,_ = self.ssh.exec_command(command)
+        _, stdout, _ = self.ssh.exec_command(command)
 
         if verbose:
             for line in stdout.readlines():
                 line = str(line).replace('\n', '')
                 print(line)
-    
+
     def execute_channel(self, command, verbose=True):
         self.channel.send(command + '\n')
 
@@ -67,10 +70,10 @@ class SSHManager:
 
             if (("ubuntu@" in output) and ("$" in output)) or self.channel.exit_status_ready():
                 break
-    
+
     def mkdirs(self, dir):
         dirs = dir.split('/')
-        for i,_ in enumerate(dirs):
+        for i, _ in enumerate(dirs):
             self.execute_command('mkdir ' + '/'.join(dirs[:i]), False)
 
     def interactive_commandline(self):
@@ -93,23 +96,24 @@ class SSHManager:
         for root, dirs, files in os.walk(from_path):
 
             for file in files:
-                self.upload_file(os.path.join(root ,file), 
-                    posixpath.join(cur_dir,file))
+                self.upload_file(os.path.join(root, file),
+                                 posixpath.join(cur_dir, file))
                 print(f"[+] Uploaded {file}..")
 
             if dirs:
                 for dir in dirs.reverse():
                     self.execute_channel('mkdir ' + dir, False)
-                    dfs = [posixpath.join(cur_dir,dirs[i]) for i in range(len(dirs))] + dfs
+                    dfs = [posixpath.join(cur_dir, dirs[i]) for i in range(len(dirs))] + dfs
             else:
                 self.execute_channel('cd ..', False)
-            
+
             if dfs:
                 cur_dir = dfs.pop(0)
                 self.execute_channel('cd ' + cur_dir, False)
-        
+
         # check if correctly uploaded
-        self.execute_command('ls -al '+ to_path, True)
+        self.execute_command('ls -al ' + to_path, True)
+
 
 if __name__ == "__main__":
     from AWS_manager import AWSManager

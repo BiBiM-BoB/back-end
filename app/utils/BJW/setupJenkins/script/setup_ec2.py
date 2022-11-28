@@ -6,6 +6,7 @@ sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(os.path.abspath(
 from utils.AWS_manager import AWSManager
 from utils.SSH_manager import SSHManager
 
+
 def SetupEC2(name):
     aws = AWSManager()
     ec2 = aws.return_ec2(name)
@@ -21,9 +22,8 @@ def SetupEC2(name):
 
     setup = SetupSSH(ec2.public_ip_address)
 
-class SetupSSH:
 
-    setup_directory = '/home/ubuntu/setup/'
+class SetupSSH:
 
     def __init__(self, ip):
         self.ip = ip
@@ -42,9 +42,11 @@ class SetupSSH:
 
         # 6. Return instance informations
         self._post_action()
-    
+
     def _connect_SSH(self):
         self.instance = SSHManager(self.ip)
+        self.username = self.instance.username
+        self.setup_directory = f'/home/{self.username}/setup/'
 
     def _upload_files(self):
         path = Path(__file__).parent.absolute()
@@ -59,16 +61,17 @@ class SetupSSH:
         self.instance.execute_channel('chmod +x setup.sh', False)
         self.instance.execute_channel(r"sed -i 's/\r$//' setup.sh")
         self.instance.execute_channel('./setup.sh')
-    
+
     def _run_jenkins(self):
         print("[+] Running Jenkins...")
         self.instance.execute_channel('chmod +x run.sh', False)
         self.instance.execute_channel(r"sed -i 's/\r$//' run.sh")
         self.instance.execute_channel('./run.sh')
-    
+
     def _post_action(self):
         print("[+] Install finished ..")
         print(f"[+] Your Server IP: {self.ip}")
+
 
 if __name__ == "__main__":
     SetupEC2('TEST_EC2_5')
