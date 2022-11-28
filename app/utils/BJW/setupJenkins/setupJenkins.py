@@ -27,7 +27,7 @@ def selectSetupMode():
     
     if mode == 3:
         ip = input("[?] IP address of your target server (xxx.xxx.xxx.xxx): ")
-        SetupSSH(name)
+        SetupSSH(ip)
 
 
 if __name__ == "__main__":
