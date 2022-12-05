@@ -29,13 +29,13 @@ class PipelineSerialize:
         print(f"PipelineSerialize Data: {self.data}")
 
     def check(self):
-        if(not self.data['pipeline_name'] or not self.data['repo_url'] or not self.data["branch"]):
+        if(not self.data['pipeline_name'] or not self.data["branch"]):
             return False
         else:
             return True
         
     def run_param_check(self):
-        if(not self.data['pipeline_name'] or not self.data['repo_url'] or not self.data["branch"]):
+        if(not self.data['pipeline_name'] or not self.data["branch"]):
             return False
         else:
             return True
@@ -175,3 +175,41 @@ class PipelineService:
             return resp(500, "run pipeline failed")
             
         return resp(200, "run pipeline success")
+
+    def get_stream():
+        try:
+            params = PipelineSerialize(request.get_json())
+        except Exception as e:
+            current_app.logger.debug("[get_stream] Pipeline Serialize error")
+            current_app.logger.debug(e)
+            return resp(500, "get stream failed")
+
+        if params.run_param_check() == False:
+            return resp(400, "check your values")
+
+        try:
+            jenkins = Jenkins(JENKINS_URL, JENKINS_ID, JENKINS_PW)
+            pipeline = jenkins.get_pipeline(params.get_element("pipeline_name"), params.get_element("branch"))
+        except Exception as e:
+            current_app.logger.debug("[get_stream] Pipeline constructor error")
+            current_app.logger.debug(e)
+            return resp(500, "get stream failed")
+
+        try:
+            import asyncio
+            import websockets
+
+            async def accept(websocket, path):
+                for line in pipeline['stream']:
+                    await websocket.send(line)
+
+            port = request.environ.get('REMOTE_PORT')
+            start_server = websockets.serve(accept, "localhost", int(port))
+            asyncio.get_event_loop().run_until_complete(start_server)
+
+        except Exception as e:
+            current_app.logger.debug("[get_stream] yielding stream error")
+            current_app.logger.debug(e)
+            return resp(500, "get stream failed")
+
+
