@@ -11,7 +11,8 @@ export default ({
     return (
         <CodeMirror
             value={code}
-            height={height}
+            height={"50vh"}
+            width={"80vw"}
             theme={sublime}
             extensions={[StreamLanguage.define(groovy)]}
         />
