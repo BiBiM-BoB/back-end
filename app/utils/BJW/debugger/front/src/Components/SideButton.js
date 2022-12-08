@@ -38,13 +38,14 @@ const Span = styled.span`
     margin-left: 3rem;
 `;
 
-export default ({image, value}) => {
+export default ({image, value, showModal}) => {
     const [isHovering, setIsHovering] = useState(false);
     const handleHovering = () => setIsHovering(!isHovering)
 
     return (
         <ButtonDiv
             hover={isHovering}
+            onClick={(e) => showModal(value, e)}
             onMouseEnter={() => handleHovering()}
             onMouseLeave={() => handleHovering()}
         >

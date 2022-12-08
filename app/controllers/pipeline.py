@@ -30,3 +30,7 @@ def delete_pipeline():
 # @login_required
 def run_pipeline():
     return PipelineService.run_pipeline()
+
+@bp.route('/getStream', methods=['POST'])
+def get_stream():
+    return PipelineService.get_stream()
