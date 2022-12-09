@@ -12,11 +12,17 @@ import xml.etree.ElementTree as ET
 import shutil
 import sys
 import os
+from collections import deque
 
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))))
 
 from utils.Git_manager import GitManager
 
+
+class NoSuchItemError(Exception):
+    def __init__(self, item):
+        msg = f"No item named {item} exists!"
+        super().__init__(msg)
 
 class XMLGenerator(GitManager):
     def __init__(self, local, remote, pipeline_name, base_xml='config.xml'):
@@ -36,10 +42,11 @@ class XMLGenerator(GitManager):
 
     def generate(self, target, target_branch, jenkinsfile_path, *args):
         element_list = [
-            ('remote', target), 
+            ('scm>url', target),
             ('name', target_branch),
             ('remoteJenkinsFile', jenkinsfile_path),
-            ('url', self.remote)
+            ('originJenkinsFileDefinition', jenkinsfile_path),
+            ('remoteJenkinsFileSCM>url', self.remote)
         ]
 
         self.target_xml = self._copyXML()
@@ -69,6 +76,16 @@ class XMLGenerator(GitManager):
             file.write(x)
 
     def _replace_content(self, target_tag, value):
+        if ">" in target_tag:
+            target_tag = target_tag.split(">")
+            target = self._2_recursive_iter(target_tag[0], target_tag[1])
+            for item in target:
+                original = item.text
+                modified = original.replace('$bibim', value)
+                item.text = modified
+                self.target_xml.write(self.xml_path, method='html', encoding='utf-8', xml_declaration=True)
+            return
+
         it = self.root.iter(target_tag)
         for target in it:
             original = target.text
@@ -76,6 +93,12 @@ class XMLGenerator(GitManager):
             modified = original.replace('$bibim', value)
             target.text = modified
         self.target_xml.write(self.xml_path, method='html', encoding='utf-8', xml_declaration=True)
+
+    def _2_recursive_iter(self, parent, child):
+        for items in self.root.iter(parent):
+            res = items.iter(child)
+        return res
+
 
     def _replace_contents(self, *args):
         for item in args[0]:

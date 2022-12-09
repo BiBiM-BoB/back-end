@@ -23,6 +23,8 @@ def debug():
         debug_dict['input_dockerfile'] = request.files.get('input_dockerfile')
         debug_dict['input_script_dir'] = request.files.getlist('input_script_dir')
 
+        print(debug_dict)
+
         debugger(debug_dict)
 
         return 'hey'

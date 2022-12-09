@@ -58,7 +58,7 @@ class Jenkins(api4jenkins.Jenkins):
         xml = XG.generate(target, target_branch, jenkinsfile)
 
         # 3. create pipeline with that two files
-        job = self.jenkins.create_job(self.pipeline_name, xml)
+        job = self.jenkins.create_job(pipeline_name, xml)
 
         return Pipeline(self, pipeline_name, target_branch, token)
 

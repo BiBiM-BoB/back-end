@@ -2,7 +2,7 @@
 FROM jenkins/jenkins:2.346.3-jdk11
 
 USER root
-
+ENV JAVA_OPTS -Djenkins.install.runSetupWizard=false
 #
 # Install Docker
 #

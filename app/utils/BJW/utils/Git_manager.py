@@ -90,5 +90,8 @@ class GitManager:
         """
             Removes this git and clones again from remote.
         """
-        shutil.rmtree(self.local)
+        try:
+            shutil.rmtree(self.local)
+        except FileNotFoundError:
+            print("[+] Are you first to bibim-service? Welcome!")
         self.clone()

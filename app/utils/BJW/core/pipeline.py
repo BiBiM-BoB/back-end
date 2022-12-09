@@ -40,7 +40,6 @@ class Pipeline:
             Return: iterator of a log stream
         """
         job = self.jenkins.build_job(self.full_name)
-
         while not job.get_build():
             time.sleep(1)
         build = job.get_build()

@@ -20,6 +20,7 @@ import os
 import pathlib
 import platform
 import sys
+from distutils import dir_util
 
 from werkzeug.datastructures import MultiDict, FileStorage
 
@@ -54,8 +55,12 @@ class DebugInitializer:
 
         self.jenkins_git.reload()
         self.sec_git.clone_or_pull()
+        self._update_jenkins_git()
 
     def debug_mode(self, input_dockerfile: FileStorage, input_script_dir: MultiDict[FileStorage], ssh_key_path=None):
+        if (not input_dockerfile) and (not input_script_dir):
+            return
+
         # purge jenkins git
         self.jenkins_git.purge('debug')
         self.jenkins_git.mkdirs('debug/Dockerfile')
@@ -104,4 +109,13 @@ class DebugInitializer:
         # git push
         self.sec_git.commit_and_push(f"Pushed components of {stage} / {tool_name}")
 
+    def _update_jenkins_git(self):
+        # removes all files under /components
+        self.jenkins_git.purge('components')
+
+        dir_util.copy_tree(str(self.sec_git.localPath/'components'), str(self.jenkins_git.localPath/'components'))
+        dir_util.copy_tree(str(self.sec_git.localPath/'jenkins'/'groovy'), str(self.jenkins_git.localPath/'components/groovy'))
+        dir_util.copy_tree(str(self.sec_git.localPath/'jenkins'/'xmls'), str(self.jenkins_git.localPath/'components/xmls'))
+
+        self.jenkins_git.commit_and_push('updated git')
 
