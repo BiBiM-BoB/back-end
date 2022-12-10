@@ -1,0 +1,1 @@
+sudo docker run -d --name jenkins -v /var/run/docker.sock:/var/run/docker.sock --env JAVA_OPTS="-Dhudson.slaves.WorkspaceList=_" --env JAVA_OPTS="-Dhudson.security.csrf.GlobalCrumbIssuerConfiguration.DISABLE_CSRF_PROTECTION=true" --volume jenkins:/var/jenkins_home -p 8080:8080 bibim-jenkins:0.1

@@ -42,10 +42,8 @@ class XMLGenerator(GitManager):
 
     def generate(self, target, target_branch, jenkinsfile_path, *args):
         element_list = [
-            ('scm>url', target),
-            ('name', target_branch),
+            ('sources>remote', target),
             ('remoteJenkinsFile', jenkinsfile_path),
-            ('originJenkinsFileDefinition', jenkinsfile_path),
             ('remoteJenkinsFileSCM>url', self.remote)
         ]
 

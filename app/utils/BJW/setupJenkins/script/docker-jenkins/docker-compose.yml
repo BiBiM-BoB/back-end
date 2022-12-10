@@ -1,0 +1,22 @@
+services:
+  jenkins:
+    build:
+      context: .
+    container_name: jenkins
+    ports:
+      - "8080:8080"
+    user: root
+    privileged: true
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /opt/jenkins:/var/jenkins_home
+    environment:
+      - JENKINS_USER=bibim
+      - JENKINS_PASS=bibim
+      - JAVA_OPTS="-Dhudson.slaves.WorkspaceList=_"
+      - JAVA_OPTS="-Dhudson.security.csrf.GlobalCrumbIssuerConfiguration.DISABLE_CSRF_PROTECTION=true"
+
+networks:
+    jenkins:
+      driver: bridge

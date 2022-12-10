@@ -18,7 +18,8 @@ def debugger(debug_dict):
         debug_dict['token']
     )
 
-    DebugInitializer(debug_dict['url']).debug_mode(
+    initializer = DebugInitializer(debug_dict['url'])
+    initializer.debug_mode(
         debug_dict['input_dockerfile'],
         debug_dict['input_script_dir']
     )

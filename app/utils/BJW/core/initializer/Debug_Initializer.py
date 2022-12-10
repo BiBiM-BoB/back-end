@@ -69,7 +69,10 @@ class DebugInitializer:
         # copy user_input files
         # shutil.copyfile(input_dockerfile, str(self.jenkins_git.localPath / 'debug/Dockerfile'))
         # TODO: secure filename
-        input_dockerfile.save(str(self.jenkins_git.localPath / 'debug/Dockerfile' / input_dockerfile.filename))
+        try:
+            input_dockerfile.save(str(self.jenkins_git.localPath / 'debug/Dockerfile' / input_dockerfile.filename))
+        except AttributeError:
+            print("[+] No dockerfile..")
 
         # copy_tree(input_script_dir, str(self.jenkins_git.localPath / 'debug/script'))
         # input_script_dir == flask filestorage list
