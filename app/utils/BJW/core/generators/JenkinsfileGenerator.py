@@ -58,6 +58,11 @@ class JenkinsfileGenerator(GitManager):
         return self.jenkinsfile_path
 
     def generate_by_raw_groovy(self, groovy):
+        self.tool_list = ['SIS/gitleaks','SIS/ggshield', 'SAST/codeql', 'DAST/ZAP', 'SCA/dependency-check']
+        while '$bibim' in groovy:
+            for line in groovy.split('\n'):
+                if '$bibim' in line:
+                    pass
         self._generate(groovy)
 
         return self.jenkinsfile_path

@@ -90,9 +90,15 @@ class Initializer:
         # removes all files under /components
         self.jenkins_git.purge('components')
 
-        dir_util.copy_tree(str(self.sec_git.localPath/'components'), str(self.jenkins_git.localPath/'components'))
-        dir_util.copy_tree(str(self.sec_git.localPath/'jenkins'/'groovy'), str(self.jenkins_git.localPath/'components/groovy'))
-        dir_util.copy_tree(str(self.sec_git.localPath/'jenkins'/'xmls'), str(self.jenkins_git.localPath/'components/xmls'))
+        self._update_worker('components', 'components')
+        self._update_worker('jenkins/groovy', 'components/groovy')
+        self._update_worker('jenkins/xmls', 'components/xmls')
 
         self.jenkins_git.commit_and_push('updated git')
+
+    def _update_worker(self, secgit_path, jenkinsgit_path):
+        dir_util.copy_tree(
+            str(self.sec_git.localPath/secgit_path),
+            str(self.jenkins_git.localPath/jenkinsgit_path)
+        )
 
