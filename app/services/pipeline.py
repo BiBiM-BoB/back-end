@@ -67,6 +67,26 @@ class PipelineService:
         tool_dict = params.get_element("tools")
         tool_dict["BUILD"] = { "NodeJS": True }
         print(tool_dict)
+        
+        # jenkins파일이 가지고 있는 tool 목록들 가져오기
+        # if ( tools = JenKinsHasToolQuery):
+        #     resp(500)
+        '''
+        tools = JenkinsHasTool.query\
+            .join(Tool, JenkinsHasTool.tool_id == Tool.id)\
+            .add_columns(Tool.name, Tool.stage)\
+            .filter(and_(JenkinsHasTool.jenkins_id == params['jenkins_id'], JenkinsHasTool.deleteAt == None))\
+            .all()
+        
+
+        tools_dict = {}
+        for tool in tools:
+            if tool.stage in tools_dict.keys():
+                tools_dict[tool.stage][tool.name] = 1
+            else:
+                row = { f"{tool.name}": 1 }
+                tools_dict[tool.stage] = row
+        '''
 
         # 파이프라인 생성
         try:
@@ -91,7 +111,7 @@ class PipelineService:
                 params.get_element("pipeline_name"),
                 params.get_element("repo_url"),
                 params.get_element("branch"),
-                test,
+                test
             )
         except Exception as e:
             current_app.logger.debug("[create_pipeline] Jenkins.create_pipeline() error")
