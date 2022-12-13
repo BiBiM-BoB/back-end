@@ -17,7 +17,10 @@ RUN setfacl -Rm d:g:docker:rwx,g:docker:rwx /var/run/
 COPY plugins.txt /usr/share/jenkins/plugins.txt
 RUN jenkins-plugin-cli --plugins -f /usr/share/jenkins/plugins.txt
 
-COPY ref /usr/share/jenkins/ref
+RUN chmod 777 -R /usr/share/jenkins/ref/init.groovy.d/
+
+COPY 00-default-user.groovy /usr/share/jenkins/ref/init.groovy.d/
+
 
 USER jenkins
 ENV JENKINS_USER bibim
