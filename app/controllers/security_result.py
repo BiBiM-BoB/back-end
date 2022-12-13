@@ -24,3 +24,7 @@ def all_pipeline_total_security_result():
 @bp.route("/pipelineNameTotalSecurityResult/<name>", methods=['GET'])
 def pipline_name_total_security_result(name):
     return SecurityResultService.pipeline_name_total_aggregate(name)
+
+@bp.route("/bibimResultList", methods=["GET"])
+def bibim_result_list():
+    return SecurityResultService.bibim_result_all_list()
