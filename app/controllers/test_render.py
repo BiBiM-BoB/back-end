@@ -25,11 +25,11 @@ def testdata():
     result_list.append(User("test1", "1234", "test1"))
     result_list.append(User("test2", "5678", "test2"))
 
-    result_list.append(Tool("ZAP", "DAST"))
-    result_list.append(Tool("Bandit", "SAST"))
+    result_list.append(Tool("ggshield", "SIS"))
+    result_list.append(Tool("Gitleaks", "SIS"))
     result_list.append(Tool("CodeQL", "SAST"))
-    result_list.append(Tool("Arachini", "DAST"))
-    result_list.append(Tool("OWASP Dependency-check", "SCA"))
+    result_list.append(Tool("ZAP", "DAST"))
+    result_list.append(Tool("dependency-check", "SCA"))
     
     result_list.append(Jenkins("python", "/home/bibim/my-jenkinsdir/python", "security", 1))
     result_list.append(Jenkins("nodejs", "/home/bibim/my-jenkinsdir/nodejs", "security", 1))

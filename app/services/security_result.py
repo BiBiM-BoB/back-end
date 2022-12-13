@@ -2,6 +2,7 @@ from pymongo import MongoClient
 from flask import current_app
 from bson import json_util
 from bson.objectid import ObjectId
+from bson.json_util import dumps
 
 from app.utils.response import resp
 
@@ -13,7 +14,6 @@ class SecurityResultService:
     def find(id):
         try:            
             result = collection.find_one({ "_id": ObjectId(id) })
-            print("==============")
             print(result)
             return resp(200, "success", result)
         except Exception as e:
@@ -79,5 +79,14 @@ class SecurityResultService:
             # bson데이터 파싱
             result = json_util.dumps(result)
             return resp(200, "success", result)
+        except Exception as e:
+            return resp(500, "failed")
+        
+    def bibim_result_all_list():
+        try:
+            bibim_collection = mongo_db["bibimresults"]
+            result = bibim_collection.find()
+            
+            return resp(200, "success", dumps(result))
         except Exception as e:
             return resp(500, "failed")
