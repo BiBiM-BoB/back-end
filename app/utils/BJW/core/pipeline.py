@@ -94,6 +94,12 @@ class Pipeline:
 
         return ret
 
+    @property
+    def overall_data(self) -> dict:
+        data = self.config
+        data['stages'] = self.stages
+        data['building'], data['recent_result'] = self.status
+        return data
 
     @property
     def history(self):

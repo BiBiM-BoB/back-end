@@ -55,11 +55,9 @@ class DebugInitializer:
 
         self.jenkins_git.reload()
         self.sec_git.clone_or_pull()
-        self._update_jenkins_git()
 
     def debug_mode(self, input_dockerfile: FileStorage, input_script_dir: MultiDict[FileStorage], ssh_key_path=None):
-        if (not input_dockerfile) and (not input_script_dir):
-            return
+        self._update_jenkins_git()
 
         # purge jenkins git
         self.jenkins_git.purge('debug')
@@ -76,10 +74,13 @@ class DebugInitializer:
 
         # copy_tree(input_script_dir, str(self.jenkins_git.localPath / 'debug/script'))
         # input_script_dir == flask filestorage list
-        for file in input_script_dir:
-            temp = file.filename.split('/')
-            temp = "/".join(temp[1:])
-            file.save(str(self.jenkins_git.localPath / 'debug/script' / temp))
+        try:
+            for file in input_script_dir:
+                temp = file.filename.split('/')
+                temp = "/".join(temp[1:])
+                file.save(str(self.jenkins_git.localPath / 'debug/script' / temp))
+        except Exception as e:
+            print("[+] No scripts..")
 
         # jenkins-git push
         self.jenkins_git.commit_and_push('Push for debug')
@@ -98,9 +99,9 @@ class DebugInitializer:
             script_dir,
             groovy_dir
         )
-
-        # copy files into secgit
-        input_dockerfile.save(str(self.sec_git.localPath / dockerfile_dir / input_dockerfile.filename))
+        if input_dockerfile:
+            # copy files into secgit
+            input_dockerfile.save(str(self.sec_git.localPath / dockerfile_dir / input_dockerfile.filename))
         for file in input_script_dir:
             temp = file.filename.split('/')
             temp = "/".join(temp[1:])

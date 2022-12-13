@@ -224,4 +224,33 @@ class PipelineService:
             current_app.logger.debug(e)
             return resp(500, "get stream failed")
 
+    def get_pipeline():
+        try:
+            params = PipelineSerialize(request.get_json())
+        except Exception as e:
+            current_app.logger.debug("[get_pipeline] Pipeline Serialize error")
+            current_app.logger.debug(e)
+            return resp(500, "get pipeline failed")
+
+        if params.run_param_check() == False:
+            return resp(400, "check your values")
+        try:
+            jenkins = Jenkins(JENKINS_URL, JENKINS_ID, JENKINS_PW)
+            pipeline = jenkins.get_pipeline(params.get_element("pipeline_name"), params.get_element("branch"))
+
+        except Exception as e:
+            current_app.logger.debug("[get_pipeline] Jenkins constructor error")
+            current_app.logger.debug(e)
+            return resp(500, "get pipeline failed")
+
+        try:
+            result = pipeline['overall_data']
+
+        except Exception as e:
+            current_app.logger.debug("[get_pipeline] Pipeline['overall_data'] error")
+            current_app.logger.debug(e)
+            return resp(500, "get pipeline failed")
+
+        return resp(201, "overall pipeline data success!", result)
+
 
