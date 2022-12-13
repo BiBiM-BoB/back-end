@@ -29,7 +29,11 @@ class PipelineSerialize:
         print(f"PipelineSerialize Data: {self.data}")
 
     def check(self):
-        if(not self.data['pipeline_name'] or not self.data["branch"]):
+        if(
+            not self.data['pipeline_name'] 
+            or not self.data["branch"] 
+            or not self.data["repo_url"] 
+            or not self.data["tools"]):
             return False
         else:
             return True
@@ -42,6 +46,10 @@ class PipelineSerialize:
 
     def get_element(self, key):
         return self.data[key]
+    
+    def set_element(self, key, data):
+        self.data[key] = data
+        return self.data
 
 class PipelineService:
     # 파이프라인 생성
@@ -56,25 +64,9 @@ class PipelineService:
         if params.check() == False:
             return resp(400, "check your values")
             
-        
-        # jenkins파일이 가지고 있는 tool 목록들 가져오기
-        # if ( tools = JenKinsHasToolQuery):
-        #     resp(500)
-        tools = JenkinsHasTool.query\
-            .join(Tool, JenkinsHasTool.tool_id == Tool.id)\
-            .add_columns(Tool.name, Tool.stage)\
-            .filter(and_(JenkinsHasTool.jenkins_id == params['jenkins_id'], JenkinsHasTool.deleteAt == None))\
-            .all()
-
-        tools_dict = {}
-        for tool in tools:
-            if tool.stage in tools_dict.keys():
-                tools_dict[tool.stage][tool.name] = 1
-            else:
-                row = { f"{tool.name}": 1 }
-                tools_dict[tool.stage] = row
-
-        tools_dict = json.dumps(tools_dict)
+        tool_dict = params.get_element("tools")
+        tool_dict["BUILD"] = { "NodeJS": True }
+        print(tool_dict)
 
         # 파이프라인 생성
         try:
@@ -84,17 +76,29 @@ class PipelineService:
             current_app.logger.debug(e)
             return resp(500, "create pipeline failed")
         
+        print(1)
+        print(params.get_element("pipeline_name"),
+                params.get_element("repo_url"),
+                params.get_element("branch"),)
+        
+        print(type(tool_dict["SIS"]["ggshield"]))
+        print(type(json.dumps(tool_dict)))
+        
+        test = json.dumps(tool_dict)
+
         try:    
             jenkins.create_pipeline(
                 params.get_element("pipeline_name"),
                 params.get_element("repo_url"),
                 params.get_element("branch"),
-                tools_dict
+                test,
             )
         except Exception as e:
             current_app.logger.debug("[create_pipeline] Jenkins.create_pipeline() error")
             current_app.logger.debug(e)
             return resp(500, "create pipeline failed")
+        
+        print(2)
         
         return resp(201, "create pipeline success")
 

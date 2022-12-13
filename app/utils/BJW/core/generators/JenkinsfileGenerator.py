@@ -69,11 +69,12 @@ class JenkinsfileGenerator(GitManager):
 
     def _json_to_list(self, tools_json) -> list:
         tools_list = []
-        tools_json = json.loads(tools_json)
+        tools = json.loads(tools_json)
 
-        for stage in tools_json.keys():
-            for tool in tools_json[stage].keys():
-                if tools_json[stage][tool]:
+        for stage in tools.keys():
+            print(tools[stage])
+            for tool in tools[stage].keys():
+                if tools[stage][tool]:
                     tools_list.append(stage + '/' + tool)
 
         return tools_list
@@ -90,7 +91,7 @@ class JenkinsfileGenerator(GitManager):
     def _write_stages(self, tool, part=None):
         # then this function will return Jenkinsfile components about running ZAP, which is variable 'stages' below.
         groovy = ""
-        component_dir = self.localgitdir + 'components/groovy'
+        component_dir = self.localPath + 'components/groovy'
         for dirname, _, files in os.walk(component_dir + tool + '/'):
             print(component_dir + tool)
             files.sort()
