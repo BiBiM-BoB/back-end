@@ -25,6 +25,21 @@ def all_pipeline_total_security_result():
 def pipline_name_total_security_result(name):
     return SecurityResultService.pipeline_name_total_aggregate(name)
 
+
+### bibim api
+
+
 @bp.route("/bibimResultList", methods=["GET"])
 def bibim_result_list():
     return SecurityResultService.bibim_result_all_list()
+
+@bp.route("/dashboardStageIssueCount", methods=["GET"])
+def dashboard_stage_issue_count():
+    return SecurityResultService.stage_issue_count()
+
+# 특정 프로젝트 선택
+# 특정 프로젝트의 issue stage별 카운트
+@bp.route("/projectStageIssueCount", methods=["GET"])
+def project_stage_issue_count():
+    return SecurityResultService.project_stage_issue_count()
+

@@ -65,9 +65,7 @@ class PipelineService:
             return resp(400, "check your values")
             
         tool_dict = params.get_element("tools")
-        tool_dict["BUILD"] = { "NodeJS": True }
-        print(tool_dict)
-        
+        tool_dict["BUILD"] = { "NodeJS": True } 
         # jenkins파일이 가지고 있는 tool 목록들 가져오기
         # if ( tools = JenKinsHasToolQuery):
         #     resp(500)
@@ -96,29 +94,19 @@ class PipelineService:
             current_app.logger.debug(e)
             return resp(500, "create pipeline failed")
         
-        print(1)
-        print(params.get_element("pipeline_name"),
-                params.get_element("repo_url"),
-                params.get_element("branch"),)
-        
-        print(type(tool_dict["SIS"]["ggshield"]))
-        print(type(json.dumps(tool_dict)))
-        
-        test = json.dumps(tool_dict)
+        tools = json.dumps(tool_dict)
 
         try:    
             jenkins.create_pipeline(
                 params.get_element("pipeline_name"),
                 params.get_element("repo_url"),
                 params.get_element("branch"),
-                test
+                tools
             )
         except Exception as e:
             current_app.logger.debug("[create_pipeline] Jenkins.create_pipeline() error")
             current_app.logger.debug(e)
             return resp(500, "create pipeline failed")
-        
-        print(2)
         
         return resp(201, "create pipeline success")
 

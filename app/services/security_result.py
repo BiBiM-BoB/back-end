@@ -90,3 +90,38 @@ class SecurityResultService:
             return resp(200, "success", dumps(result))
         except Exception as e:
             return resp(500, "failed")
+        
+    def stage_issue_count():
+        try:
+            bibim_collection = mongo_db["bibimresults"]
+            
+            query = [
+                { "$unwind" : "$data" },
+                { "$group" : { "_id" : "$stage", "count" : { "$sum" : 1 } }}
+            ]
+            
+            result = bibim_collection.aggregate(query)
+            return resp(200, "success", list(result))
+            
+        except Exception as e:
+            current_app.logger.debug("stage_issue_count service error")
+            current_app.logger.debug(e)
+            return resp(500, "failed")
+        
+    def project_stage_issue_count(name):
+        try:
+            bibim_collection = mongo_db["bibimresults"]
+            
+            query = [
+                { "$match" : { "pipelineName" : name  } },
+                { "$unwind" : "$data" },
+                { "$group" : { "_id" : "$stage", "count" : { "$sum" : 1 } }}
+            ]
+            
+            result = bibim_collection.aggregate(query)
+            return resp(200, "success", list(result))
+            
+        except Exception as e:
+            current_app.logger.debug("stage_issue_count service error")
+            current_app.logger.debug(e)
+            return resp(500, "failed")
