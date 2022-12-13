@@ -19,6 +19,10 @@ def create_pipeline():
 @bp.route('/pipelineList', methods=['GET'])
 def get_pipeline_list():
     return PipelineService.pipeline_list()
+
+@bp.route('/getPipeline', methods=['POST'])
+def get_pipeline():
+    return PipelineService.get_pipeline()
     
 # @bp.route('/updatePipeline/<id>', methods=['POST'])
 
