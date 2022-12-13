@@ -60,11 +60,13 @@ class PipelineService:
         # jenkins파일이 가지고 있는 tool 목록들 가져오기
         # if ( tools = JenKinsHasToolQuery):
         #     resp(500)
+        '''
         tools = JenkinsHasTool.query\
             .join(Tool, JenkinsHasTool.tool_id == Tool.id)\
             .add_columns(Tool.name, Tool.stage)\
             .filter(and_(JenkinsHasTool.jenkins_id == params['jenkins_id'], JenkinsHasTool.deleteAt == None))\
             .all()
+        
 
         tools_dict = {}
         for tool in tools:
@@ -73,8 +75,7 @@ class PipelineService:
             else:
                 row = { f"{tool.name}": 1 }
                 tools_dict[tool.stage] = row
-
-        tools_dict = json.dumps(tools_dict)
+        '''
 
         # 파이프라인 생성
         try:
@@ -89,7 +90,7 @@ class PipelineService:
                 params.get_element("pipeline_name"),
                 params.get_element("repo_url"),
                 params.get_element("branch"),
-                tools_dict
+                json.dumps(params.get_element("tools_dict"))
             )
         except Exception as e:
             current_app.logger.debug("[create_pipeline] Jenkins.create_pipeline() error")

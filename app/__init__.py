@@ -22,7 +22,7 @@ def create_app():
             'file': {
                 'level': 'DEBUG',
                 'class': 'logging.handlers.RotatingFileHandler',
-                'filename': "/home/bibim/back-end/app/logs/bibim.app.log",
+                'filename': "/home/onedayginger/bibim-bob/back-end/app/logs/bibim.app.log",
                 'maxBytes': 1024 * 1024 * 5,  # 5 MB
                 'backupCount': 5,
                 'formatter': 'default',
