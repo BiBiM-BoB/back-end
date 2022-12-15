@@ -125,3 +125,57 @@ class SecurityResultService:
             current_app.logger.debug("stage_issue_count service error")
             current_app.logger.debug(e)
             return resp(500, "failed")
+        
+    def accumulate_precision():
+        try:
+            bibim_collection = mongo_db["bibimresults"]
+            
+            query = [
+                { "$unwind" : "$data" },
+                { "$group" : { "_id" : "$bibimPrecision", "count" : { "$sum" : 1 } }}
+            ]
+            
+            result = bibim_collection.aggregate(query)
+            return resp(200, "success", list(result))
+            
+        except Exception as e:
+            current_app.logger.debug("stage_issue_count service error")
+            current_app.logger.debug(e)
+            return resp(500, "failed")
+        
+    def project_precision(name):
+        try:
+            bibim_collection = mongo_db["bibimresults"]
+            
+            query = [
+                { "$match" : { "pipelineName" : name  } },
+                { "$unwind" : "$data" },
+                { "$group" : { "_id" : "$bibimPrecision", "count" : { "$sum" : 1 } }}
+            ]
+            
+            result = bibim_collection.aggregate(query)
+            return resp(200, "success", list(result))
+        
+        except Exception as e:
+            current_app.logger.debug("stage_issue_count service error")
+            current_app.logger.debug(e)
+            return resp(500, "failed")
+        
+    def project_date_issue_count(name):
+        try:
+            bibim_collection = mongo_db["bibimresults"]
+            
+            query = [
+                { "$match" : { "pipelineName" : name  } },
+                { "$sort" : { "createAt": -1 } },
+                { "$unwind" : "$data" },
+                { "$group" : { "_id" : "$bibimPrecision", "count" : { "$sum" : 1 } }}
+            ]
+            
+            result = bibim_collection.aggregate(query)
+            return resp(200, "success", list(result))
+        
+        except Exception as e:
+            current_app.logger.debug("stage_issue_count service error")
+            current_app.logger.debug(e)
+            return resp(500, "failed")

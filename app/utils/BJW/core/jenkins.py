@@ -62,7 +62,7 @@ class Jenkins(api4jenkins.Jenkins):
 
         #  check if pipeline already exists
         check = (pipeline_name, target_branch)
-        if check in self.get_pipelines(True):
+        if check in self.get_pipelines():
             raise PipelineExistsError(pipeline_name, target_branch)
 
         # 0. Init gits
@@ -149,6 +149,7 @@ class Jenkins(api4jenkins.Jenkins):
                 if temp[1] != pipeline['branch']:
                     if temp[1] != pipeline['branch'][2:]:                    
                         continue
+                pipeline['pipeline_name'] = temp[0]
                 ret.append(pipeline)
 
         return ret

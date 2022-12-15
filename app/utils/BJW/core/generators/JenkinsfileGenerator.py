@@ -113,10 +113,11 @@ class JenkinsfileGenerator(GitManager):
     # Let's say,
     # self._write_stages('DAST/ZAP')
     def _write_stages(self, tool, part=None):
+        print(f"JenkinsfileGenerator._write_stages called: {tool}")
         # then this function will return Jenkinsfile components about running ZAP, which is variable 'stages' below.
         groovy = ""
         component_dir = str(self.localPath / 'components/groovy')
-        for dirname, _, files in os.walk(component_dir + tool + '/'):
+        for dirname, _, files in os.walk(component_dir + '/' + tool + '/'):
             print(component_dir + tool)
             files.sort()
             if not part:

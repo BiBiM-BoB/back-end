@@ -37,9 +37,16 @@ def bibim_result_list():
 def dashboard_stage_issue_count():
     return SecurityResultService.stage_issue_count()
 
+@bp.route("/allProjectPrecisionCount", methods=["GET"])
+def all_project_precision_count():
+    return SecurityResultService.accumulate_precision()
+
 # 특정 프로젝트 선택
 # 특정 프로젝트의 issue stage별 카운트
 @bp.route("/projectStageIssueCount/<name>", methods=["GET"])
 def project_stage_issue_count(name):
     return SecurityResultService.project_stage_issue_count(name)
 
+@bp.route("/projectPrecisionCount/<name>", methods=["GET"])
+def project_precision_count(name):
+    return SecurityResultService.project_precision(name)
