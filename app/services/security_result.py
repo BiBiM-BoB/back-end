@@ -132,11 +132,23 @@ class SecurityResultService:
             
             query = [
                 { "$unwind" : "$data" },
-                { "$group" : { "_id" : "$bibimPrecision", "count" : { "$sum" : 1 } }}
+                { "$group" : { "_id" : "$data.bibimPrecision", "count" : { "$sum" : 1 } }}
             ]
             
             result = bibim_collection.aggregate(query)
-            return resp(200, "success", list(result))
+            
+            # 없는 값 대비
+            precision_reference = {
+                "Critical": 0,
+                "Major": 0,
+                "Minor": 0,
+                "Info": 0,
+                "None": 0
+            }
+            for row in result:
+                precision_reference[row["_id"]] = row["count"]
+                
+            return resp(200, "success", precision_reference)
             
         except Exception as e:
             current_app.logger.debug("stage_issue_count service error")
@@ -150,11 +162,24 @@ class SecurityResultService:
             query = [
                 { "$match" : { "pipelineName" : name  } },
                 { "$unwind" : "$data" },
-                { "$group" : { "_id" : "$bibimPrecision", "count" : { "$sum" : 1 } }}
+                { "$group" : { "_id" : "$data.bibimPrecision", "count" : { "$sum" : 1 } }}
             ]
             
             result = bibim_collection.aggregate(query)
-            return resp(200, "success", list(result))
+            
+            # 없는 값 대비
+            precision_reference = {
+                "Critical": 0,
+                "Major": 0,
+                "Minor": 0,
+                "Info": 0,
+                "None": 0
+            }
+            
+            for row in result:
+                precision_reference[row["_id"]] = row["count"]
+                
+            return resp(200, "success", precision_reference)
         
         except Exception as e:
             current_app.logger.debug("stage_issue_count service error")
