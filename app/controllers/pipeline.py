@@ -23,6 +23,14 @@ def get_pipeline_list():
 @bp.route('/getPipeline', methods=['POST'])
 def get_pipeline():
     return PipelineService.get_pipeline()
+
+@bp.route('/getJenkinsfiles', methods=['GET'])
+def get_jenkinsfiles():
+    return PipelineService.get_jenkinsfiles()
+
+@bp.route('/getStatus', methods=['GET'])
+def get_status():
+    return PipelineService.get_status()
     
 # @bp.route('/updatePipeline/<id>', methods=['POST'])
 

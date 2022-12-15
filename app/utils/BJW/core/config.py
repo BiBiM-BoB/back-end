@@ -1,8 +1,12 @@
 import platform
 import pathlib
-import os
+import os, sys
 from getpass import getuser
 import xml.etree.ElementTree as ET
+
+sys.path.append(os.path.dirname(os.path.abspath(os.path.abspath(os.path.dirname(__file__)))))
+
+from utils.Git_manager import GitManager
 
 
 class NoSuchElementError(Exception):
@@ -19,10 +23,11 @@ class Config:
     else:
         root = pathlib.PureWindowsPath(os.path.expanduser('~\\Documents\\bibim\\userContent'))
 
-    def __init__(self, jenkins_url, pipeline_name):
+    def __init__(self, jenkins_url, pipeline_name, reload=True):
         self.jenkins_url = self._url_init(jenkins_url)
         self.jenkins_git = GitManager(str(self.root), self.jenkins_url)
-        self.jenkins_git.reload()
+        if reload:
+            self.jenkins_git.reload()
 
         self.filename = pipeline_name + '.xml'
         self.xml_path = str(self.jenkins_git.localPath/f"xmls/{pipeline_name}")

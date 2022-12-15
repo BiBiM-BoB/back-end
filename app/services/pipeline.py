@@ -96,13 +96,19 @@ class PipelineService:
         
         tools = json.dumps(tool_dict)
 
-        try:    
+        try:
+            get_dict = dict(params.data)
+            get_dict.pop('pipeline_name')
+            get_dict.pop('tools')
+            
             jenkins.create_pipeline(
                 params.get_element("pipeline_name"),
                 params.get_element("repo_url"),
                 params.get_element("branch"),
-                tools
+                tools,
+                **get_dict
             )
+            
         except Exception as e:
             current_app.logger.debug("[create_pipeline] Jenkins.create_pipeline() error")
             current_app.logger.debug(e)
@@ -213,16 +219,52 @@ class PipelineService:
 
             async def accept(websocket, path):
                 for line in pipeline['stream']:
-                    await websocket.send(line)
+                    yield websocket.send(line)
 
             port = request.environ.get('REMOTE_PORT')
-            start_server = websockets.serve(accept, "localhost", int(port))
+            start_server = websockets.serve(accept, "localhost", 52200)
             asyncio.get_event_loop().run_until_complete(start_server)
 
         except Exception as e:
             current_app.logger.debug("[get_stream] yielding stream error")
             current_app.logger.debug(e)
             return resp(500, "get stream failed")
+        
+    def get_jenkinsfiles():
+        try:
+            jenkins = Jenkins(JENKINS_URL, JENKINS_ID, JENKINS_PW)
+            result = jenkins['jenkinsfiles']
+
+        except Exception as e:
+            current_app.logger.debug("[get_jenkinsfiles] Jenkins constructor error")
+            current_app.logger.debug(e)
+            return resp(500, "get jenkinsfiles failed")
+
+        return resp(201, "get jenkinsfiles success!", result)
+    
+    def get_status():
+        try:
+            jenkins = Jenkins(JENKINS_URL, JENKINS_ID, JENKINS_PW)
+            result = jenkins['jenkinsfiles']
+
+        except Exception as e:
+            current_app.logger.debug("[get_jenkinsfiles] Jenkins constructor error")
+            current_app.logger.debug(e)
+            return resp(500, "get jenkinsfiles failed")
+
+        return resp(201, "get jenkinsfiles success!", result)
+    
+    def get_status():
+        try:
+            jenkins = Jenkins(JENKINS_URL, JENKINS_ID, JENKINS_PW)
+            result = jenkins.get_building()
+
+        except Exception as e:
+            current_app.logger.debug("[get_status] Jenkins constructor error")
+            current_app.logger.debug(e)
+            return resp(500, "get status failed")
+
+        return resp(201, "get status success!", result)
 
     def get_pipeline():
         try:

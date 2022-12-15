@@ -71,19 +71,16 @@ class Pipeline:
         return self._get_stream()
 
     @property
-    def stages(self):
-        with open(self.config['jenkinsfile_abs_path'], 'r', encoding='utf-8') as f:
-            firstline = f.readline()
-            stage_list = firstline.lstrip('// ').split(', ')
-        return stage_list
-
-    @property
     def jenkinsfile_name(self):
         return self.config['jenkinsfile']
 
     @property
     def config(self) -> dict:
-        config = Config(self.jenkins.url, self.pipeline_name)
+        return self.get_config()
+        
+    
+    def get_config(self, reload=False) -> dict:
+        config = Config(self.jenkins.url, self.pipeline_name, reload)
         p = config.jenkins_git.localPath
 
         ret = dict()
@@ -93,12 +90,42 @@ class Pipeline:
         ret['jenkinsfile_abs_path'] = str(p/config['remoteJenkinsFile'])
 
         return ret
+    
+    def get_metadata(self, config) -> dict:
+        path = config['jenkinsfile_abs_path']
+        
+        status = 'description'
+        description = ''
+        
+        with open(path, 'r', encoding='utf-8') as jenkinsfile:
+            metadata = {'jenkinsfile_name': config['jenkinsfile']}
+            for line in jenkinsfile.readlines():
+                line = line.strip()
+                
+                # '// data'
+                if 'bibim_metadata_start' in line:
+                    status = 'start'
+                    continue
+                
+                if 'bibim_metadata_end' in line:
+                    break
+                    
+                if status == 'description':
+                    description += line[3:] + '\n'
+                
+                elif status == 'start':
+                    key, value = line[3:].split(': ')
+                    metadata[key] = value
+        metadata['description'] = description
+        
+        return metadata
 
     @property
     def overall_data(self) -> dict:
-        data = self.config
-        data['stages'] = self.stages
+        data = dict(self.get_config())
         data['building'], data['recent_result'] = self.status
+        data.update(self.get_metadata(data))
+        
         return data
 
     @property

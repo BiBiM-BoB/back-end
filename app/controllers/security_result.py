@@ -39,7 +39,7 @@ def dashboard_stage_issue_count():
 
 # 특정 프로젝트 선택
 # 특정 프로젝트의 issue stage별 카운트
-@bp.route("/projectStageIssueCount", methods=["GET"])
-def project_stage_issue_count():
-    return SecurityResultService.project_stage_issue_count()
+@bp.route("/projectStageIssueCount/<name>", methods=["GET"])
+def project_stage_issue_count(name):
+    return SecurityResultService.project_stage_issue_count(name)
 

@@ -26,23 +26,26 @@ from utils.Git_manager import GitManager
 
 
 class JenkinsfileGenerator(GitManager):
-    def __init__(self, local, remote, pipeline_name):
+    def __init__(self, local, remote, pipeline_name, jenkinsfile_name):
         # set basic jenkins-git property
         super().__init__(local, remote)
 
         self.pipeline_name = pipeline_name
-        self.jenkinsfile_path = f"Jenkinsfiles/{pipeline_name}"
+        if not jenkinsfile_name:
+            self.jenkinsfile_path = f"Jenkinsfiles/{pipeline_name}"
+        else:
+            self.jenkinsfile_path = f"Jenkinsfiles/{jenkinsfile_name}"
 
         try:
             os.makedirs(str(self.localPath / 'Jenkinsfiles'))
         except FileExistsError:
             print("[+] Jenkinsfile dir exists.")
 
-    def generate_by_json(self, tools_json):
-        # json -> list
+    def generate_by_json(self, tools_json, **kwargs):
+        # json -> list, write metadata to jenkinsfile
         self.tool_list = self._json_to_list(tools_json)
-        groovy = '// ' + ', '.join(self.tool_list) + '\n'
-
+        groovy = self._write_metadata(tool_list=str(self.tool_list), **kwargs)
+        
         # generate groovy script
         groovy += self._write_stages('FUNC', 'start')
         for tool in self.tool_list:
@@ -53,11 +56,11 @@ class JenkinsfileGenerator(GitManager):
         self._generate(groovy)
 
         # git push generated groovy script into jenkins-git
-        self.commit_and_push(f'Generated Jenkinsfile "{self.pipeline_name} in {self.jenkinsfile_path}.')
+        self.commit_and_push(f'Generated Jenkinsfile of "{self.pipeline_name} in {self.jenkinsfile_path}.')
 
         return self.jenkinsfile_path
 
-    def generate_by_raw_groovy(self, groovy):
+    def generate_by_raw_groovy(self, groovy, **kwargs):
         self.tool_list = ['SIS/gitleaks','SIS/ggshield', 'SAST/codeql', 'DAST/ZAP', 'SCA/dependency-check']
         while '$bibim' in groovy:
             for line in groovy.split('\n'):
@@ -90,6 +93,22 @@ class JenkinsfileGenerator(GitManager):
             if stage in tool:
                 ret.append(tool)
         return ret
+    
+    def _write_metadata(self, **kwargs):
+        print(kwargs)
+        firstline = ''
+        metadata = '// bibim_metadata_start\n'
+        
+        for key, value in kwargs.items():
+            if key == 'description':
+                description_list = value.split('\n')
+                for line in description_list:
+                    firstline += '// ' + line + '\n'
+                    
+            else:       
+                metadata += '// ' + ': '.join([key, value]) + '\n'
+        
+        return firstline + metadata + '// bibim_metadata_end\n'
 
     # Let's say,
     # self._write_stages('DAST/ZAP')
