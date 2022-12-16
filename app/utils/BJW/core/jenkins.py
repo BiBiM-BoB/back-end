@@ -132,6 +132,18 @@ class Jenkins(api4jenkins.Jenkins):
                         key, value = line[3:].split(': ')
                         metadata[key] = value
             metadata['description'] = description
+            
+            t = metadata['tool_list']
+            temp = t[2:-2].split("', '")
+            temp_dict = dict()
+            for tool in temp:
+                a, b = tool.split('/')
+                if a in temp_dict.keys():
+                    temp_dict[a].append(b)
+                else:
+                    temp_dict[a] = [b]
+            metadata['tool_list'] = dict(temp_dict)
+            
             ret.append(metadata)
         
         return ret
