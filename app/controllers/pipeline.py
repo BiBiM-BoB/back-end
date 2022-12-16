@@ -43,6 +43,10 @@ def delete_pipeline():
 def run_pipeline():
     return PipelineService.run_pipeline()
 
+@bp.route('/stopPipeline', methods=['POST'])
+def stop_pipeline():
+    return PipelineService.stop_pipeline()
+
 @bp.route('/getStream', methods=['POST'])
 def get_stream():
     return PipelineService.get_stream()

@@ -194,6 +194,33 @@ class PipelineService:
             
         return resp(200, "run pipeline success")
 
+    # 파이프라인 멈추기
+    def stop_pipeline():
+        try:
+            params = PipelineSerialize(request.get_json())
+        except Exception as e:
+            current_app.logger.debug("[stop_pipeline] error")
+            current_app.logger.debug(e)
+            return resp(500, "stop pipeline failed")
+
+        try:
+            jenkins = Jenkins(JENKINS_URL, JENKINS_ID, JENKINS_PW)
+            pipeline = jenkins.get_pipeline(params.get_element("pipeline_name"), params.get_element("branch"))
+        except Exception as e:
+            current_app.logger.debug("[stop_pipeline] Pipeline constructor error")
+            current_app.logger.debug(e)
+            return resp(500, "stop pipeline failed")
+        
+        # 파이프라인 실행
+        try:
+            pipeline.stop()
+        except Exception as e:
+            current_app.logger.debug("[stop_pipeline] Pipeline.stop_pipeline() error")
+            current_app.logger.debug(e)
+            return resp(500, "stop pipeline failed")
+            
+        return resp(200, "stop pipeline success")
+    
     def get_stream():
         try:
             params = PipelineSerialize(request.get_json())
@@ -214,6 +241,7 @@ class PipelineService:
             return resp(500, "get stream failed")
 
         try:
+            '''
             import asyncio
             import websockets
 
@@ -224,6 +252,12 @@ class PipelineService:
             port = request.environ.get('REMOTE_PORT')
             start_server = websockets.serve(accept, "localhost", 52200)
             asyncio.get_event_loop().run_until_complete(start_server)
+            '''
+            from flask import stream_with_context, Response
+            
+            def generate():
+                return pipeline.stream
+            return Response(stream_with_context(generate()))
 
         except Exception as e:
             current_app.logger.debug("[get_stream] yielding stream error")
@@ -242,7 +276,7 @@ class PipelineService:
 
         return resp(201, "get jenkinsfiles success!", result)
     
-    def get_status():
+    def get_jenkinsfiles():
         try:
             jenkins = Jenkins(JENKINS_URL, JENKINS_ID, JENKINS_PW)
             result = jenkins['jenkinsfiles']

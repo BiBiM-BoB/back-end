@@ -20,6 +20,7 @@
 '''
 
 import time
+import sys
 from typing import Generator
 
 from .config import Config
@@ -58,6 +59,11 @@ class Pipeline:
             self.pipeline_name,
             target, branch, tool_json, groovy, token, args
         )
+
+    def stop(self):
+        job = self.jenkins.get_job(self.full_name)
+        build = job.get_last_build()
+        build.stop()
 
     @property
     def status(self) -> tuple:
@@ -116,6 +122,19 @@ class Pipeline:
                 elif status == 'start':
                     key, value = line[3:].split(': ')
                     metadata[key] = value
+                    
+        t = metadata['tool_list']
+        temp = t[2:-2].split("', '")
+        print(temp)
+        temp_dict = dict()
+        for tool in temp:
+            a, b = tool.split('/')
+            if a in temp_dict.keys():
+                temp_dict[a].append(b)
+            else:
+                temp_dict[a] = [b]
+        metadata['tool_list'] = dict(temp_dict)
+        
         metadata['description'] = description
         
         return metadata

@@ -61,8 +61,7 @@ class Jenkins(api4jenkins.Jenkins):
                         *args, **kwargs) -> Pipeline:
 
         #  check if pipeline already exists
-        check = (pipeline_name, target_branch)
-        if check in self.get_pipelines():
+        if pipeline_name in self.get_pipelines(simple=True):
             raise PipelineExistsError(pipeline_name, target_branch)
 
         # 0. Init gits
@@ -138,19 +137,25 @@ class Jenkins(api4jenkins.Jenkins):
         return ret
             
             
-    def get_pipelines(self):
+    def get_pipelines(self, simple=False):
         ret = []
         
-        for job in self.iter_jobs(4):
-            if type(job) is WorkflowJob:
-                temp = job.full_name.split('/')
-                pipeline = self.get_pipeline(temp[0], temp[1])
-                pipeline = pipeline['overall_data']
-                if temp[1] != pipeline['branch']:
-                    if temp[1] != pipeline['branch'][2:]:                    
-                        continue
-                pipeline['pipeline_name'] = temp[0]
-                ret.append(pipeline)
+        if simple:
+            for job in self.iter_jobs():
+                ret.append(job.name)
+        
+        else:
+            for job in self.iter_jobs(4):
+                if type(job) is WorkflowJob:
+                    temp = job.full_name.split('/')
+                    pipeline = self.get_pipeline(temp[0], temp[1])
+                    pipeline = pipeline['overall_data']
+                    print(pipeline)
+                    if temp[1] != pipeline['branch']:
+                        if temp[1] != pipeline['branch'][2:]:                    
+                            continue
+                    pipeline['pipeline_name'] = temp[0]
+                    ret.append(pipeline)
 
         return ret
     
@@ -162,6 +167,5 @@ class Jenkins(api4jenkins.Jenkins):
             ret.append(i.get_job())
         return ret
         
-
     def __getitem__(self, key):
         return getattr(self, key)

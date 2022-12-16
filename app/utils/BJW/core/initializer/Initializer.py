@@ -69,8 +69,7 @@ class Initializer:
             updated = self._setup_git()
 
         # if sec-git is updated, copy sec-git into jenkins-git, and push
-        if updated:
-            self._update_jenkins_git()
+        self._update_jenkins_git()
         
         print("[+] Finished Initializing!")
 

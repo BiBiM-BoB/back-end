@@ -44,6 +44,7 @@ class JenkinsfileGenerator(GitManager):
     def generate_by_json(self, tools_json, **kwargs):
         # json -> list, write metadata to jenkinsfile
         self.tool_list = self._json_to_list(tools_json)
+            
         groovy = self._write_metadata(tool_list=str(self.tool_list), **kwargs)
         
         # generate groovy script
@@ -105,10 +106,12 @@ class JenkinsfileGenerator(GitManager):
                 for line in description_list:
                     firstline += '// ' + line + '\n'
                     
-            else:       
+            else:
+                if key == 'branch':
+                    branch = f'def branch = \'{value}\'\n'
                 metadata += '// ' + ': '.join([key, value]) + '\n'
-        
-        return firstline + metadata + '// bibim_metadata_end\n'
+                
+        return firstline + metadata + '// bibim_metadata_end\n' + branch
 
     # Let's say,
     # self._write_stages('DAST/ZAP')

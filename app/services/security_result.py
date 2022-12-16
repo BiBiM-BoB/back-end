@@ -3,12 +3,69 @@ from flask import current_app
 from bson import json_util
 from bson.objectid import ObjectId
 from bson.json_util import dumps
+from dotenv import load_dotenv
+import os
 
 from app.utils.response import resp
 
 client = MongoClient('mongodb://localhost:27017/')
 mongo_db = client["test"] # 사용하는 db 명
 collection = mongo_db["securityresults"]
+
+load_dotenv()
+JENKINS_URL = os.environ.get("JENKINS_URL")
+JENKINS_ID = os.environ.get("JENKINS_ID")
+JENKINS_PW = os.environ.get("JENKINS_PW")
+
+def _getProjectPrecisions(name):
+    bibim_collection = mongo_db["bibimresults"]
+    query = [
+            { "$match" : { "pipelineName" : name  } },
+            { "$unwind" : "$data" },
+            { "$group" : { "_id" : "$data.bibimPrecision", "count" : { "$sum" : 1 } }}
+        ]
+        
+    result = bibim_collection.aggregate(query)
+    
+    # 없는 값 대비
+    precision_reference = {
+        "precision" : {
+            "Critical": 0,
+            "Major": 0,
+            "Minor": 0,
+            "Info": 0,
+            "None": 0
+        },
+        "grade": ""
+    }
+    
+    sigma_s = 0
+    
+    for row in result:
+        precision_reference["precision"][row["_id"]] = row["count"]
+        sigma_s += row["count"]
+        
+    epsilon_e = 0.2
+    epsilon_d = 0.2
+    epsilon_c = 0.2
+    epsilon_b = 0.2
+    otherwise = 1 - (epsilon_e + epsilon_d + epsilon_c + epsilon_b)
+    
+    if(sigma_s == 0):
+        sigma_s = 0.00001
+    
+    if(epsilon_e <= (precision_reference["precision"]["Critical"] / sigma_s)):
+        precision_reference["grade"] = "E"
+    elif(epsilon_d <= (precision_reference["precision"]["Major"] / sigma_s)):
+        precision_reference["grade"] = "D"
+    elif(epsilon_c <= (precision_reference["precision"]["Minor"] / sigma_s)):
+        precision_reference["grade"] = "C"
+    elif(epsilon_b <= (precision_reference["precision"]["Info"] / sigma_s)):
+        precision_reference["grade"] = "B"
+    elif(otherwise <= (precision_reference["precision"]["None"] / sigma_s)):
+        precision_reference["grade"] = "A"
+    
+    return precision_reference
 
 class SecurityResultService:
     def find(id):
@@ -126,6 +183,8 @@ class SecurityResultService:
             current_app.logger.debug(e)
             return resp(500, "failed")
         
+    
+        
     def accumulate_precision():
         try:
             bibim_collection = mongo_db["bibimresults"]
@@ -137,16 +196,42 @@ class SecurityResultService:
             
             result = bibim_collection.aggregate(query)
             
-            # 없는 값 대비
+            from app.utils.BJW.core.jenkins import Jenkins
+
+            jen = Jenkins(JENKINS_URL, JENKINS_ID, JENKINS_PW)
+            pipeline_names = jen.get_pipelines(simple=True)
+            
             precision_reference = {
-                "Critical": 0,
-                "Major": 0,
-                "Minor": 0,
-                "Info": 0,
-                "None": 0
+                "precision" : {
+                    "Critical": 0,
+                    "Major": 0,
+                    "Minor": 0,
+                    "Info": 0,
+                    "None": 0
+                },
+                "grade": {
+                    "A": 0,
+                    "B": 0,
+                    "C": 0,
+                    "D": 0,
+                    "E": 0
+                },
             }
+            
+            sigma_s = 0
+            
+            # 전체 precision 구하기
             for row in result:
-                precision_reference[row["_id"]] = row["count"]
+                precision_reference["precision"][row["_id"]] = row["count"]
+                sigma_s += row["count"]
+            
+            # 각 파이프라인별 grade 개수 추가
+            for name in pipeline_names:
+                pipeline_precision = _getProjectPrecisions(name)
+                if(pipeline_precision["grade"] == ""):
+                    pass
+                else:
+                    precision_reference["grade"][pipeline_precision["grade"]] += 1
                 
             return resp(200, "success", precision_reference)
             
@@ -169,15 +254,47 @@ class SecurityResultService:
             
             # 없는 값 대비
             precision_reference = {
-                "Critical": 0,
-                "Major": 0,
-                "Minor": 0,
-                "Info": 0,
-                "None": 0
+                "precision" : {
+                    "Critical": 0,
+                    "Major": 0,
+                    "Minor": 0,
+                    "Info": 0,
+                    "None": 0
+                },
+                "grade": "",
+                "qualityGate": False
             }
             
+            sigma_s = 0
+            
             for row in result:
-                precision_reference[row["_id"]] = row["count"]
+                precision_reference["precision"][row["_id"]] = row["count"]
+                sigma_s += row["count"]
+            
+            epsilon_e = 0.2
+            epsilon_d = 0.2
+            epsilon_c = 0.2
+            epsilon_b = 0.2
+            otherwise = 1 - (epsilon_e + epsilon_d + epsilon_c + epsilon_b)
+            epsilon_p = 0.2
+            
+            if(epsilon_e <= (precision_reference["precision"]["Critical"] / sigma_s)):
+                precision_reference["grade"] = "E"
+            elif(epsilon_d <= (precision_reference["precision"]["Major"] / sigma_s)):
+                precision_reference["grade"] = "D"
+            elif(epsilon_c <= (precision_reference["precision"]["Minor"] / sigma_s)):
+                precision_reference["grade"] = "C"
+            elif(epsilon_b <= (precision_reference["precision"]["Info"] / sigma_s)):
+                precision_reference["grade"] = "B"
+            elif(otherwise <= (precision_reference["precision"]["None"] / sigma_s)):
+                precision_reference["grade"] = "A"
+            
+            quality = ((precision_reference["precision"]["Critical"] + precision_reference["precision"]["Major"]) / sigma_s)
+            
+            if(epsilon_p >= quality):
+                precision_reference["qualityGate"] = True
+            else:
+                precision_reference["qualityGate"] = False
                 
             return resp(200, "success", precision_reference)
         
