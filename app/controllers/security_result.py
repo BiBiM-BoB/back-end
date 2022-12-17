@@ -37,6 +37,14 @@ def bibim_result_list():
 def dashboard_stage_issue_count():
     return SecurityResultService.stage_issue_count()
 
+@bp.route("/dashboardCwe25", methods=["GET"])
+def dashboard_cwe25_count():
+    return SecurityResultService.dashboard_cwe25()    
+
+@bp.route("/dashboardOwasp10", methods=["GET"])
+def dashboard_owasp_10():
+    return SecurityResultService.dashboard_owasp10()
+
 @bp.route("/allProjectPrecisionCount", methods=["GET"])
 def all_project_precision_count():
     return SecurityResultService.accumulate_precision()

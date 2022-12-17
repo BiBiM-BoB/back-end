@@ -282,3 +282,4 @@ cweId,cweURL,cveFrequency,cweToCvePath,cvedetailssiteHash,cvssv3
 84,//www.cvedetails.com/cwe-details/84/Failure-to-Resolve-Encoded-URI-Schemes-in-a-Web-Page.html,1,https://www.cvedetails.com/vulnerability-list/cweid-84/vulnerabilities.html,9b82953a0a95f663fa9470699e97374df2bc9ad8,0
 87,//www.cvedetails.com/cwe-details/87/Failure-to-Sanitize-Alternate-XSS-Syntax.html,1,https://www.cvedetails.com/vulnerability-list/cweid-87/vulnerabilities.html,x,0
 98,//www.cvedetails.com/cwe-details/98/Improper-Control-of-Filename-for-Include-Require-Statement-i.html,1,https://www.cvedetails.com/vulnerability-list/cweid-98/vulnerabilities.html,x,0
+829,,71,,,6.6

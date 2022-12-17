@@ -108,10 +108,12 @@ class JenkinsfileGenerator(GitManager):
                     
             else:
                 if key == 'branch':
-                    branch = f'def branch = \'{value}\'\n'
+                    branch = f'def branch_name = \'{value}\'\n'
                 metadata += '// ' + ': '.join([key, value]) + '\n'
-                
-        return firstline + metadata + '// bibim_metadata_end\n' + branch
+            
+        pipeline_name = f'def pipeline_name = \'{self.pipeline_name}\'\n'
+        
+        return firstline + metadata + '// bibim_metadata_end\n' + branch + pipeline_name
 
     # Let's say,
     # self._write_stages('DAST/ZAP')

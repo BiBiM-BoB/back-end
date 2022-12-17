@@ -7,6 +7,8 @@ from dotenv import load_dotenv
 import os
 
 from app.utils.response import resp
+from ..utils.mongoHandler import MongoHandler
+from ..utils.dashboardOwasp import DashboardOWASP
 
 client = MongoClient('mongodb://localhost:27017/')
 mongo_db = client["test"] # 사용하는 db 명
@@ -20,10 +22,10 @@ JENKINS_PW = os.environ.get("JENKINS_PW")
 def _getProjectPrecisions(name):
     bibim_collection = mongo_db["bibimresults"]
     query = [
-            { "$match" : { "pipelineName" : name  } },
-            { "$unwind" : "$data" },
-            { "$group" : { "_id" : "$data.bibimPrecision", "count" : { "$sum" : 1 } }}
-        ]
+        { "$match" : { "pipelineName" : name  } },
+        { "$unwind" : "$data" },
+        { "$group" : { "_id" : "$data.bibimPrecision", "count" : { "$sum" : 1 } }}
+    ]
         
     result = bibim_collection.aggregate(query)
     
@@ -318,6 +320,50 @@ class SecurityResultService:
             return resp(200, "success", list(result))
         
         except Exception as e:
-            current_app.logger.debug("stage_issue_count service error")
+            current_app.logger.debug("project_date_issue_count service error")
+            current_app.logger.debug(e)
+            return resp(500, "failed")
+    
+    def dashboard_cwe25():
+        try:
+            database = 'test'
+            collection = 'bibimresults'
+            mongo = MongoHandler(database, collection)
+            
+            result = {}
+            cwe25 = [787, 79, 89, 20, 125, 78, 416, 22, 352, 434, 476, 502, 190, 287, 798, 862, 77, 306, 119, 276, 918, 362, 400, 611, 94]
+            
+            for i in cwe25:
+                result[i] = 0
+                
+            class test:
+                def cwe(data: list) -> dict:
+                    # top25 = [0 for i in range(len(test.cwe25))]
+                    for item in data:
+                        if item['cweId'] in cwe25:
+                            index = item['cweId']
+                            result[index] += 1
+                            
+                    # result = { key:value for key, value in zip(test.cwe25, top25) }
+                    return True
+                
+            for i in mongo._getFindIterator():
+                test.cwe(i['data'])
+                
+            del mongo
+            return resp(200, "success", result)
+        except Exception as e:
+            current_app.logger.debug("dashboard_cwe25() service error")
+            current_app.logger.debug(e)
+            return resp(500, "failed")
+    
+    def dashboard_owasp10():
+        try:
+            dash = DashboardOWASP()
+            result = dash.getDashboardOWASP()
+            
+            return resp(200, "success", result)
+        except Exception as e:
+            current_app.logger.debug("dashboard_owasp10() service error")
             current_app.logger.debug(e)
             return resp(500, "failed")
