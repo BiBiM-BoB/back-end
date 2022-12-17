@@ -12,7 +12,7 @@ from ..models.tool import tool_schema, tools_schema
 from ..utils.db import db_apply, join_to_json
 
 
-bp = Blueprint('test_render', __name__, url_prefix='/')
+bp = Blueprint('test_render', __name__, url_prefix='/debug')
 
 @bp.route('/')
 def main():
@@ -74,3 +74,11 @@ def test_get():
     print(join_to_json(tools, "tools", jenkins_has_tool_schema, tool_schema))
 
     return "test success"
+
+@bp.route("/adminInsert", methods=["GET"])
+def admin_insert():
+    result_list = list()
+    result_list.append(User("admin", "admin", "admin"))
+    
+    db_apply(result_list)
+    return "success"

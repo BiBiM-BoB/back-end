@@ -86,7 +86,7 @@ class Pipeline:
         
     
     def get_config(self, reload=False) -> dict:
-        config = Config(self.jenkins.url, self.pipeline_name, reload)
+        config = Config(self.jenkins.url, self.pipeline_name, reload=False)
         p = config.jenkins_git.localPath
 
         ret = dict()
@@ -125,7 +125,6 @@ class Pipeline:
                     
         t = metadata['tool_list']
         temp = t[2:-2].split("', '")
-        print(temp)
         temp_dict = dict()
         for tool in temp:
             a, b = tool.split('/')

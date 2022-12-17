@@ -157,17 +157,26 @@ class Jenkins(api4jenkins.Jenkins):
                 ret.append(job.name)
         
         else:
+            status = "FOUND"
+            ban_list = []
             for job in self.iter_jobs(4):
                 if type(job) is WorkflowJob:
                     temp = job.full_name.split('/')
-                    pipeline = self.get_pipeline(temp[0], temp[1])
-                    pipeline = pipeline['overall_data']
-                    print(pipeline)
+                    if temp[0] in ban_list:
+                        continue
+                    if status == "FOUND":
+                        pipeline = self.get_pipeline(temp[0], temp[1])
+                        pipeline = pipeline['overall_data']
+                    
+                    
                     if temp[1] != pipeline['branch']:
-                        if temp[1] != pipeline['branch'][2:]:                    
-                            continue
-                    pipeline['pipeline_name'] = temp[0]
-                    ret.append(pipeline)
+                        status = "SEARCHING"
+                        
+                    if temp[1] == pipeline['branch']:
+                        status = "FOUND"
+                        pipeline['pipeline_name'] = temp[0]
+                        ret.append(pipeline)
+                        ban_list.append(temp[0])
 
         return ret
     

@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from dotenv import load_dotenv
 import jwt
 import os
+import hashlib
 
 from ..models import db
 from ..models.user import User
@@ -41,19 +42,26 @@ class UserService:
             
             if(not params['user_id'] or not params['password']):
                 return resp(400, "check your values")
-
+            
+            def password_hash(password):
+                salt = "bibimbob" # 추후 env 설정 필요
+                hashed = hashlib.sha512(str(password + salt).encode('utf-8')).hexdigest()
+                return hashed
+            
+            password = password_hash(params['password'])
+            
             user_match = User.query.filter(and_(
-                User.user_id==params['user_id'], 
-                User.password==params['password'])).first()
+                User.user_id==params['user_id'],
+                User.password==password)).first()
             
             # 기존에 있는 유저인지 확인후, token 부여(60 * 60 * 24 => 1일)
             if(user_match):
                 payload = {
-                    "user_id": params['id'],
+                    "user_id": user_match.user_id,
                     "exp": datetime.utcnow() + timedelta(seconds=60 * 60 * 24)
                 }
+                
                 token = jwt.encode(payload, TOKEN_SECRET_KEY, algorithm=TOKEN_ALGORITHM) # 추후, 환경변수로 변경
-
                 return resp(200, "login success", { "access_token" : token })
             else:
                 return resp(400, "login failed")
